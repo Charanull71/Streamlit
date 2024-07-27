@@ -2,6 +2,7 @@ import streamlit as st
 from pymongo import MongoClient
 import pandas as pd
 import importlib
+import toml
 from WTF import help,issues,adminissue,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18,l19,l20,l21,l22, retrieve, facultyretrieve, notification, HODD, sent, r, pdf
 
 # st.markdown("""
@@ -21,6 +22,15 @@ from WTF import help,issues,adminissue,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, 
 #             }
 #     </style>
 # """, unsafe_allow_html=True)
+config = toml.load('.streamlit/config.toml')
+
+# Get the hide_st_style value from the config file
+hide_st_style = config.get('server', {}).get('hide_st_style', '')
+
+if hide_st_style:
+    st.markdown(hide_st_style, unsafe_allow_html=True)
+else:
+    st.warning('The hide_st_style configuration is not set.')
 hide_st_style = """
     <style>
         #MainMenu {visibility: hidden;}
