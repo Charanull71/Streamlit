@@ -67,7 +67,7 @@ def main(username):
                 "nature_of_work": incharge,
                 "since_date": incharge_since.strftime("%Y-%m"),  # Extracting year and month
                 "points": points_dict[incharge]
-            })
+            })  
         
         # CURRENTLY engaged Committee Memberships
         st.write("**CURRENTLY engaged Committee Memberships**")

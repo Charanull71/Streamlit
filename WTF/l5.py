@@ -41,10 +41,10 @@ def main(username):
             label_visibility=st.session_state.visibility,
             disabled=st.session_state.disabled,
         )
-        
+        relevance_options = ["Yes","No"]
         relevance = st.selectbox(
             "Is the Subject Relevant to Your Field",
-            ("Yes", "No"),
+            options=relevance_options,
             label_visibility=st.session_state.visibility,
             disabled=st.session_state.disabled,
         )

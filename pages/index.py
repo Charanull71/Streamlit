@@ -2,18 +2,32 @@ import streamlit as st
 from pymongo import MongoClient
 import pandas as pd
 import importlib
-from WTF import help,issues,adminissue,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, retrieve, facultyretrieve, notification, HODD, sent, r, pdf
+from WTF import help,issues,adminissue,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18,l19,l20,l21,l22, retrieve, facultyretrieve, notification, HODD, sent, r, pdf
 
-st.markdown("""
+# st.markdown("""
+#     <style>
+#             #MainMenu{visibility: hidden;}
+#         .st-emotion-cache-1wbqy5l e3g6aar2{
+#             display: none !important;
+#             visibility: hidden;
+#         }
+#         .st-emotion-cache-1huvf7z ef3psqc5{
+#             display: none !important;
+#             visibility: hidden;
+#         }
+#         .st-emotion-cache-1huvf7z ef3psqc6{
+#             display: none important;
+#             visibility: hidden;
+#             }
+#     </style>
+# """, unsafe_allow_html=True)
+hide_st_style = """
     <style>
-        .st-emotion-cache-1wbqy5l e3g6aar2{
-            display: none !important;
-        }
-        .st-emotion-cache-1huvf7z ef3psqc5{
-            display: none !important;
-        }
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
     </style>
-""", unsafe_allow_html=True)
+    """
+st.markdown(hide_st_style, unsafe_allow_html=True)
 
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
@@ -87,58 +101,68 @@ def principal_home():
         st.write("No sent page")
 
 def faculty_home():
+    st.image('img.png')
     st.title(f"Welcome Faculty: {st.session_state.username}")
 
     if st.sidebar.button("Logout"):
         logout()
 
-    available_pages = ["Help","l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l10", "l11", "l12", "l13", "l14", "l15", "l16", "l17", "l18", "Retrieve", "Notifications","Issues"]
+    available_pages = ["Help","THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED","PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY","FUNDED PROJECTS","FELLOWSHIP/AWARD","OTHER INFORMATION","NUMBER OF LEAVES AVAILED", "Retrieve", "Notifications","Issues"]
     nav = st.sidebar.radio("Navigation", available_pages)
 
     if nav =="Help":
         help.main()
-    elif nav == "l1":
+    elif nav == "THEORY COURSES HANDLED":
         l1.main(st.session_state.username)
-    elif nav == "l2":
-        l2.main()
-    elif nav == "l3":
-        l3.main()
-    elif nav == "l4":
+    elif nav == "STUDENT PROJECT WORKS UNDERTAKEN":
+        l2.main(st.session_state.username)
+    elif nav == "STUDENT TRAINING":
+        l3.main(st.session_state.username)
+    elif nav == "LEARNING MATERIAL":
         l4.main(st.session_state.username)
-    elif nav == "l5":
+    elif nav == "CERTIFICATE COURSES DONE":
         l5.main(st.session_state.username)
-    elif nav == "l6":
+    elif nav == "FDPs ATTENDED":
         l6.main(st.session_state.username)
-    elif nav == "l7":
+    elif nav == "FDPs ORGANIZED":
         l7.main(st.session_state.username)
-    elif nav == "l8":
+    elif nav == "FDPs ORGANIZED":
         l8.main(st.session_state.username)
-    elif nav == "l9":
+    elif nav == "STUDENT COUNSELLING / MENTORING":
         l9.main(st.session_state.username)
-    elif nav == "l10":
+    elif nav == "MEMBERSHIPS WITH PROFESSIONAL BODIES":
         l10.main(st.session_state.username)
-    elif nav == "l11":
+    elif nav == "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES":
         l11.main(st.session_state.username)
-    elif nav == "l12":
+    elif nav == "JOURNAL PUBLICATIONS":
         l12.main(st.session_state.username)
-    elif nav == "l13":
+    elif nav == "CONFERENCE PUBLICATIONS":
         l13.main(st.session_state.username)
-    elif nav == "l14":
+    elif nav == "RESEARCH GUIDANCE (Ph.D/M.Phil)":
         l14.main(st.session_state.username)
-    elif nav == "l15":
+    elif nav == "BOOK PUBLICATIONS":
         l15.main(st.session_state.username)
-    elif nav == "l16":
+    elif nav == "PATENTS":
         l16.main(st.session_state.username)
-    elif nav == "l17":
+    elif nav == "PRODUCT DESIGN / SOFTWARE DEVELOPMENT":
         l17.main(st.session_state.username)
-    elif nav == "l18":
+    elif nav == "CONSULTANCY":
         l18.main(st.session_state.username)
+    elif nav == "FUNDED PROJECTS":
+        l19.main(st.session_state.username)
+    elif nav == "FELLOWSHIP/AWARD":
+        l20.main(st.session_state.username)
+    elif nav == "OTHER INFORMATION":
+        l21.main(st.session_state.username)
+    elif nav == "NUMBER OF LEAVES AVAILED":
+        l22.main(st.session_state.username) 
     elif nav == "Retrieve":
         facultyretrieve.main(st.session_state.username)
     elif nav == "Notifications":
         notification.main(st.session_state.username)
     elif nav == "Issues":
         issues.main(st.session_state.username)
+
 
 def admin_home():
     st.title(f"Welcome Admin: {st.session_state.username}")
