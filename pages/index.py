@@ -22,22 +22,22 @@ from WTF import help,issues,adminissue,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, 
 #             }
 #     </style>
 # """, unsafe_allow_html=True)
-config = toml.load('.streamlit/config.toml')
+# config = toml.load('project/config.toml')
 
-# Get the hide_st_style value from the config file
-hide_st_style = config.get('server', {}).get('hide_st_style', '')
+# # Get the hide_st_style value from the config file
+# hide_st_style = config.get('server', {}).get('hide_st_style', '')
 
-if hide_st_style:
-    st.markdown(hide_st_style, unsafe_allow_html=True)
-else:
-    st.warning('The hide_st_style configuration is not set.')
-hide_st_style = """
-    <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-    </style>
-    """
-st.markdown(hide_st_style, unsafe_allow_html=True)
+# if hide_st_style:
+#     st.markdown(hide_st_style, unsafe_allow_html=True)
+# else:
+#     st.warning('The hide_st_style configuration is not set.')
+# hide_st_style = """
+#     <style>
+#         #MainMenu {visibility: hidden;}
+#         footer {visibility: hidden;}
+#     </style>
+#     """
+# st.markdown(hide_st_style, unsafe_allow_html=True)
 
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
@@ -148,7 +148,7 @@ def faculty_home():
         l12.main(st.session_state.username)
     elif nav == "CONFERENCE PUBLICATIONS":
         l13.main(st.session_state.username)
-    elif nav == "RESEARCH GUIDANCE (Ph.D/M.Phil)":
+    elif nav == "RESEARCH GUIDANCE":
         l14.main(st.session_state.username)
     elif nav == "BOOK PUBLICATIONS":
         l15.main(st.session_state.username)

@@ -6,10 +6,10 @@ import base64
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
-collection = db['l13']  # Replace 'lll02' with your actual collection name
+collection = db['l13']  # Replace 'l13' with your actual collection name
 collection_users = db['users']
 
-def calculate_conference_points(proceeding_type, venue_location, authorship_position):
+def calculate_conference_points(proceeding_type, venue_location, authorship_position, venue_level):
     points_dict = {
         "IEEE/Springer or equivalent": {
             "India": {
@@ -36,7 +36,8 @@ def calculate_conference_points(proceeding_type, venue_location, authorship_posi
             }
         }
     }
-    return points_dict.get(proceeding_type, {}).get(venue_location, {}).get(authorship_position, 0)
+
+    return points_dict.get(proceeding_type, {}).get(venue_location, {}).get(venue_level, {}).get(authorship_position, 0)
 
 def main(username):
     with st.form("l13"):
@@ -44,7 +45,7 @@ def main(username):
 
         st.write("Conference Publication Details")
         ath = st.text_input("No of authors", value="", placeholder="Enter Number of Authors")
-        pat = st.text_input("Position of authorship", value="", placeholder="Enter Position of Authorship")
+        pat = st.selectbox("Position of authorship", ["", "1st author", "other"])
         pven = st.text_input("Venue of Conference", value="", placeholder="Enter Conference Venue")
         Jtype = st.selectbox("Venue at India/Abroad", ["", "India", "Abroad"])
         ptype = st.selectbox("Proceedings type", ["", "IEEE/Springer or equivalent", "Other Conferences"])
@@ -79,7 +80,7 @@ def main(username):
                 encoded_pdf = base64.b64encode(pdf_content).decode('utf-8')
 
                 # Calculate points
-                points = calculate_conference_points(ptype, Jtype, "1st author" if pat.lower() == "1st" else "other")
+                points = calculate_conference_points(ptype, Jtype, pat, venue_level)
 
                 data = {
                     "username": username,

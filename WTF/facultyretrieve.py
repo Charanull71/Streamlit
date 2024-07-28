@@ -16,6 +16,9 @@ collection8 = db['l8']
 collection10 = db['l10']
 collection11 = db['l11']
 collection12 = db['l12']
+collection13 = db['l13']
+collection14 = db['l14']
+collection15 = db['l15']
 # Function to calculate points for l1
 def calpoints(option1, option2, res):
     if option1 == "Excellent" and option2 == "Excellent":
@@ -275,6 +278,57 @@ def get_points_l12(journal_type, authorship_position):
         "Other National Journals": {"1st author": 70, "other": 10}
     }
     return points_dict.get(journal_type, {}).get(authorship_position, 0)
+def get_points_l13(proceeding_type, venue_location, authorship_position):
+    points_dict = {
+        "IEEE/Springer or equivalent": {
+            "India": {
+                "> University Level": {"1st author": 80, "other": 10},
+                "University Level": {"1st author": 70, "other": 10},
+                "College Level": {"1st author": 60, "other": 5}
+            },
+            "Abroad": {
+                "> University Level": {"1st author": 100, "other": 20},
+                "University Level": {"1st author": 90, "other": 20},
+                "College Level": {"1st author": 80, "other": 10}
+            }
+        },
+        "Other Conferences": {
+            "India": {
+                "> University Level": {"1st author": 40, "other": 5},
+                "University Level": {"1st author": 30, "other": 5},
+                "College Level": {"1st author": 20, "other": 5}
+            },
+            "Abroad": {
+                "> University Level": {"1st author": 50, "other": 10},
+                "University Level": {"1st author": 40, "other": 10},
+                "College Level": {"1st author": 30, "other": 5}
+            }
+        }
+    }
+    return points_dict.get(proceeding_type, {}).get(venue_location, {}).get(authorship_position, 0)
+def get_points_l14(guide_type, date_of_registration):
+    current_date = datetime.datetime.now()
+    duration = (current_date - date_of_registration).days / 365.25  # Convert duration to years
+
+    if guide_type.lower() == "guide":
+        if duration <= 1:
+            return 100
+        elif 1 < duration <= 2:
+            return 75
+        elif 2 < duration <= 3:
+            return 50
+        else:
+            return 25
+    elif guide_type.lower() == "co-guide":
+        if duration <= 1:
+            return 50
+        elif 1 < duration <= 2:
+            return 35
+        elif 2 < duration <= 3:
+            return 20
+        else:
+            return 0
+    return 0
 # Function to fetch all data from collection1
 def fetch_all_data_collection1(username):
     return list(collection1.find({"username": username}))
@@ -421,6 +475,51 @@ def fetch_row_data_collection12(row_id):
 def update_data_collection12(row_id, new_data):
     try:
         update_result = collection12.find_one_and_update(
+            {"_id": ObjectId(row_id)},
+            {"$set": new_data},
+            return_document=True
+        )
+        return update_result is not None
+    except Exception as e:
+        st.error(f"Error updating data: {e}")
+        return False
+def fetch_all_data_collection13(username):
+    return list(collection13.find({"username": username}))
+def fetch_row_data_collection13(row_id):
+    return collection13.find_one({"_id": ObjectId(row_id)})
+def update_data_collection13(row_id, new_data):
+    try:
+        update_result = collection13.find_one_and_update(
+            {"_id": ObjectId(row_id)},
+            {"$set": new_data},
+            return_document=True
+        )
+        return update_result is not None
+    except Exception as e:
+        st.error(f"Error updating data: {e}")
+        return False
+def fetch_all_data_collection14(username):
+    return list(collection14.find({"username": username}))
+def fetch_row_data_collection14(row_id):
+    return collection14.find_one({"_id": ObjectId(row_id)})
+def update_data_collection14(row_id, new_data):
+    try:
+        update_result = collection14.find_one_and_update(
+            {"_id": ObjectId(row_id)},
+            {"$set": new_data},
+            return_document=True
+        )
+        return update_result is not None
+    except Exception as e:
+        st.error(f"Error updating data: {e}")
+        return False
+def fetch_all_data_collection15(username):
+    return list(collection15.find({"username": username}))
+def fetch_row_data_collection15(row_id):
+    return collection15.find_one({"_id": ObjectId(row_id)})
+def update_data_collection15(row_id, new_data):
+    try:
+        update_result = collection15.find_one_and_update(
             {"_id": ObjectId(row_id)},
             {"$set": new_data},
             return_document=True
@@ -973,6 +1072,126 @@ def display_form_collection12(row_data=None, row_id=None):
                 st.success("Data inserted successfully!")
         except Exception as e:
             st.error(f"An error occurred: {e}")
+def display_form_collection13(row_data=None, row_id=None):
+    st.header("No. Of Conference Publications in Present Assessment Year:")
+
+    ath = st.text_input("Number of Authors", value=row_data["number_of_authors"] if row_data else "", placeholder="Enter Number of Authors")
+    pat = st.text_input("Position of Authorship", value=row_data["position_of_authorship"] if row_data else "", placeholder="Enter Position of Authorship")
+    pven = st.text_input("Venue of Conference", value=row_data["conference_venue"] if row_data else "", placeholder="Enter Conference Venue")
+    Jtype = st.selectbox("Venue at India/Abroad", ["", "India", "Abroad"], index=["", "India", "Abroad"].index(row_data["venue_location"]) if row_data else 0)
+    ptype = st.selectbox("Proceedings Type", ["", "IEEE/Springer or equivalent", "Other Conferences"], index=["", "IEEE/Springer or equivalent", "Other Conferences"].index(row_data["proceedings_type"]) if row_data else 0)
+    venue_level = st.selectbox("Venue Level", ["", "> University Level", "University Level", "College Level"], index=["", "> University Level", "University Level", "College Level"].index(row_data["venue_level"]) if row_data else 0)
+    
+    # File uploader for PDF
+    pdf_uploader = st.file_uploader("Upload your work in PDF", type=["pdf"])
+
+    if st.button("Submit"):
+        # Check for empty fields
+        if not (ath and pat and pven and Jtype and ptype and venue_level):
+            st.error("Please fill out all required fields.")
+            return
+
+        if not pdf_uploader and not row_data:
+            st.error("Please upload the PDF.")
+            return
+
+        try:
+            username = st.session_state.username  # Replace with your actual way of getting username
+
+            # Query users collection to get department for the specified username
+            user_data = collection_users.find_one({"username": username})
+            if user_data:
+                department = user_data.get("department", "")
+            else:
+                st.error("Username not found in users collection.")
+                return
+
+            # Read the file content and encode it in base64
+            pdf_content = pdf_uploader.read() if pdf_uploader else row_data["pdf"]
+            encoded_pdf = base64.b64encode(pdf_content).decode('utf-8')
+
+            # Calculate points
+            points = get_points_l13(ptype, Jtype, "1st author" if pat.lower() == "1st" else "other")
+
+            data = {
+                "username": username,
+                "number_of_authors": ath,
+                "position_of_authorship": pat,
+                "conference_venue": pven,
+                "venue_location": Jtype,
+                "proceedings_type": ptype,
+                "venue_level": venue_level,
+                "pdf": encoded_pdf,
+                "department": department,
+                "points": points,
+                "date": datetime.datetime.now()
+            }
+
+            if row_id:
+                if collection13.update_one({"_id": row_id}, {"$set": data}):
+                    st.success(f"Data updated successfully!")
+                else:
+                    st.error("Failed to update data.")
+            else:
+                collection13.insert_one(data)
+                st.success(f"Data inserted successfully!")
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+def display_form_collection14(row_data=None, row_id=None):
+    st.header("RESEARCH GUIDANCE (Ph.D/M.Phil)")
+
+    n1 = st.text_input("No. Of STUDENTS Completed Ph.D/M.Phil:", value=row_data["students_completed"] if row_data else "", placeholder="Enter number of students completed")
+    deg = st.text_input("Degree", value=row_data["degree"] if row_data else "", placeholder="Enter Degree")
+    uni = st.text_input("University", value=row_data["university"] if row_data else "", placeholder="Enter University")
+    gui = st.selectbox("Guide/Co-Guide", ["", "Guide", "Co-Guide"], index=["", "Guide", "Co-Guide"].index(row_data["guide"]) if row_data else 0)
+    frod3 = st.date_input("Date of Registration", row_data["date_of_registration"] if row_data else datetime.datetime.now().date(), format="YYYY-MM-DD")
+    stype = st.text_input("Student Particulars", value=row_data["student_particulars"] if row_data else "", placeholder="Enter Particulars Of Student")
+
+    if st.button("Submit"):
+        # Check for empty fields
+        if not (n1 and deg and uni and gui and stype):
+            st.error("Please fill out all required fields.")
+            return
+
+        try:
+            # Convert date to datetime.datetime
+            frod3 = datetime.datetime.combine(frod3, datetime.datetime.min.time())
+            username = st.session_state.username  # Replace with your actual way of getting username
+
+            # Query users collection to get department for the specified username
+            user_data = collection_users.find_one({"username": username})
+            if user_data:
+                department = user_data.get("department", "")
+            else:
+                st.error("Username not found in users collection.")
+                return
+
+            # Calculate points
+            points = get_points_l14(gui, frod3)
+
+            data = {
+                "username": username,
+                "students_completed": n1,
+                "degree": deg,
+                "university": uni,
+                "guide": gui,
+                "date_of_registration": frod3,
+                "student_particulars": stype,
+                "department": department,
+                "points": points,
+                "date": datetime.datetime.now()
+            }
+
+            if row_id:
+                if collection14.update_one({"_id": row_id}, {"$set": data}):
+                    st.success(f"Data updated successfully!")
+                else:
+                    st.error("Failed to update data.")
+            else:
+                collection14.insert_one(data)
+                st.success(f"Data inserted successfully! Total Points: {points}")
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
 # Main function to display the app
 def main(username):
     st.sidebar.title("Navigation")
@@ -988,7 +1207,9 @@ def main(username):
             "FDPs Organized",
             "Memberships with Professional Bodies",
             "Chairing Sessions & Delivering Talks and Lectures",
-            "Journal Publications"  # Assuming l12 corresponds to Research Projects or similar
+            "Journal Publications",
+            "Conference Publications",
+            "Research Guidance"  # Adding this new collection
         ]
     )
 
@@ -1201,6 +1422,60 @@ def main(username):
         
         if 'current_row_id' in st.session_state:
             display_form_collection12(row_data=st.session_state.current_data, row_id=st.session_state.current_row_id)
+    elif collection_choice == "Conference Publications":
+        st.header("Conference Publications")
+
+        st.subheader("All Entries")
+        username_input = st.text_input("Enter Username", value=st.session_state.get("username", ""))
+        
+        if username_input:
+            data_l13 = fetch_all_data_collection13(username_input)
+            if data_l13:
+                for entry in data_l13:
+                    st.markdown(f"**Proceeding Type:** {entry['proceedings_type']}")
+                    st.markdown(f"**Number of Authors:** {entry['number_of_authors']}")
+                    st.markdown(f"**Authorship Position:** {entry['position_of_authorship']}")
+                    st.markdown(f"**Conference Venue:** {entry['conference_venue']}")
+                    st.markdown(f"**Venue Location:** {entry['venue_location']}")
+                    st.markdown(f"**Venue Level:** {entry['venue_level']}")
+                    st.markdown(f"**Points:** {entry['points']}")
+                    st.markdown(f"**Date:** {entry['date']}")
+                    if st.button(f"Modify", key=f"modify_{entry['_id']}"):
+                        st.session_state.current_row_id = str(entry["_id"])
+                        st.session_state.current_data = entry
+                        st.experimental_rerun()
+                    st.write("---")
+            else:
+                st.write("No data found")
+        
+        if 'current_row_id' in st.session_state:
+            display_form_collection13(row_data=st.session_state.current_data, row_id=st.session_state.current_row_id)
+    elif collection_choice == "Research Guidance":
+        st.header("Research Guidance")
+        st.subheader("All Entries")
+        username_input = st.text_input("Enter Username", value=st.session_state.get("username", ""))
+        if username_input:
+            data_l14 = fetch_all_data_collection14(username_input)
+            if data_l14:
+                for entry in data_l14:
+                    st.markdown(f"**Number of Students:** {entry['students_completed']}")
+                    st.markdown(f"**Degree:** {entry['degree']}")
+                    st.markdown(f"**University:** {entry['university']}")
+                    st.markdown(f"**Guide Type:** {entry['guide']}")
+                    st.markdown(f"**Date of Registration:** {entry['date_of_registration']}")
+                    st.markdown(f"**Student Particulars:** {entry['student_particulars']}")
+                    st.markdown(f"**Points:** {entry['points']}")
+                    st.markdown(f"**Date:** {entry['date']}")
+                    if st.button(f"Modify", key=f"modify_{entry['_id']}"):
+                        st.session_state.current_row_id = str(entry["_id"])
+                        st.session_state.current_data = entry
+                        st.experimental_rerun()
+                    st.write("---")
+            else:
+               st.write("No data found")
+        if 'current_row_id' in st.session_state:
+            display_form_collection13(row_data=st.session_state.current_data, row_id=st.session_state.current_row_id)
+
 
 # Run the main function with a test username
 if __name__ == "__main__":
