@@ -44,7 +44,7 @@ def main(username):
     # Update session state with the selected project type
     if project_type != st.session_state.project_type:
         st.session_state.project_type = project_type
-        st.experimental_rerun()
+        st.rerun()
 
     if st.session_state.project_type == "B.Tech":
         st.header("B.Tech Projects")

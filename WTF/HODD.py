@@ -21,7 +21,27 @@ def main(username):
     st.title(f"Retrieve Data for Department: {hod_department.upper()}")
     
     with st.form("retrieve_form"):
-        table = st.selectbox("Select Table", ["l1", "l2", "l3", "l4", "l5", "ll1", "ll2", "ll3", "ll4", "ll5", "ll6", "lll1", "l13", "lll3", "lll4", "lll5", "lll6", "lll7"])
+        table = st.selectbox("Select Table",
+         [ "Theory Courses Handled",
+           "Student Project Works Undertaken", 
+           "Student Training Activities", 
+           "Learning Material", 
+           "Certificates Courses Done", 
+           "FDPs Attended",
+            "FDPs Organized",
+            "Memberships with Professional Bodies",
+            "Chairing Sessions & Delivering Talks and Lectures",
+            "Journal Publications",
+            "Conference Publications",
+            "Research Guidance",
+            "Book Publications",
+            "Patents",
+            "Product Design/Software Development",
+            "Consultancy",
+            "Funded Projects",
+            "Fellowship/Award",
+            "Ph.D. Details",
+            "Leaves Availed"])
         
         # Date filter inputs
         start_date = st.date_input("Start Date")

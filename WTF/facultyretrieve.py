@@ -2173,7 +2173,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---") 
             else:
                 st.write("No data found.")
@@ -2202,7 +2202,7 @@ def main(username):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
                         st.session_state.project_type = "B.Tech"  # Set project type
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found for B.Tech projects.")
@@ -2222,7 +2222,7 @@ def main(username):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
                         st.session_state.project_type = "M.Tech/MBA"  # Set project type
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found for M.Tech/MBA projects.")
@@ -2254,7 +2254,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---") 
             else:
                 st.write("No data found.")
@@ -2278,7 +2278,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---") 
             else:
                 st.write("No data found")
@@ -2301,7 +2301,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---") 
             else:
                 st.write("No data found")
@@ -2329,7 +2329,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found")
@@ -2355,7 +2355,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found")
@@ -2380,7 +2380,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---") 
             else:
                 st.write("No data found")
@@ -2409,7 +2409,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found")
@@ -2433,7 +2433,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found")
@@ -2461,7 +2461,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found")
@@ -2487,7 +2487,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                st.write("No data found")
@@ -2513,7 +2513,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found.")
@@ -2521,7 +2521,7 @@ def main(username):
         if st.sidebar.button("Add New Entry"):
             st.session_state.current_row_id = None
             st.session_state.current_data = None
-            st.experimental_rerun()
+            st.rerun()
 
         if 'current_row_id' in st.session_state:
             display_form_collection15(st.session_state.current_data, st.session_state.current_row_id)
@@ -2545,7 +2545,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---") 
             else:
                 st.write("No data found.")
@@ -2570,7 +2570,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---") 
             else:
                 st.write("No data found.")
@@ -2597,7 +2597,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found.")
@@ -2620,7 +2620,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found.")
@@ -2643,7 +2643,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found.")
@@ -2668,7 +2668,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found.")
@@ -2697,7 +2697,7 @@ def main(username):
                     if st.button(f"Modify", key=f"modify_{entry['_id']}"):
                         st.session_state.current_row_id = str(entry["_id"])
                         st.session_state.current_data = entry
-                        st.experimental_rerun()
+                        st.rerun()
                     st.write("---")
             else:
                 st.write("No data found.")
