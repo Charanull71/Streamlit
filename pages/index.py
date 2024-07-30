@@ -1,55 +1,28 @@
 import streamlit as st
 from pymongo import MongoClient
 import pandas as pd
-import importlib
-import toml
-from WTF import help,issues,adminissue,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18,l19,l20,l21,l22, retrieve, facultyretrieve, notification, HODD, sent, r, pdf
+from streamlit_cookies_manager import EncryptedCookieManager
+from WTF import help, issues, adminissue, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD, sent, r, pdf
 
-# st.markdown("""
-#     <style>
-#             #MainMenu{visibility: hidden;}
-#         .st-emotion-cache-1wbqy5l e3g6aar2{
-#             display: none !important;
-#             visibility: hidden;
-#         }
-#         .st-emotion-cache-1huvf7z ef3psqc5{
-#             display: none !important;
-#             visibility: hidden;
-#         }
-#         .st-emotion-cache-1huvf7z ef3psqc6{
-#             display: none important;
-#             visibility: hidden;
-#             }
-#     </style>
-# """, unsafe_allow_html=True)
-# config = toml.load('project/config.toml')
+# Initialize EncryptedCookieManager with required 'password'
+cookies = EncryptedCookieManager(password="a$tr0ngP@ssw0rdTh@tIsS3cur3")
 
-# # Get the hide_st_style value from the config file
-# hide_st_style = config.get('server', {}).get('hide_st_style', '')
-
-# if hide_st_style:
-#     st.markdown(hide_st_style, unsafe_allow_html=True)
-# else:
-#     st.warning('The hide_st_style configuration is not set.')
-# hide_st_style = """
-#     <style>
-#         #MainMenu {visibility: hidden;}
-#         footer {visibility: hidden;}
-#     </style>
-#     """
-# st.markdown(hide_st_style, unsafe_allow_html=True)
+# Check if cookies are loaded
+if not cookies.ready:
+    st.warning("Cookies are not loaded. Please check your configuration.")
 
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 
+# Check if session state variables are set using cookies
 if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-if "role" not in st.session_state:
-    st.session_state.role = ""
+    st.session_state.logged_in = cookies.get("logged_in") == "True"
 
 if "username" not in st.session_state:
-    st.session_state.username = ""
+    st.session_state.username = cookies.get("username")
+
+if "role" not in st.session_state:
+    st.session_state.role = cookies.get("role")
 
 def login():
     st.title("Login")
@@ -68,9 +41,27 @@ def login():
                 st.session_state.username = username
                 st.session_state.password = password
                 st.session_state.role = role
+
+                # Set cookies
+                cookies["logged_in"] = "True"
+                cookies["username"] = username
+                cookies["role"] = role
                 st.experimental_rerun()
         else:
             st.error("Invalid username, password, or role")
+
+def logout():
+    st.session_state.logged_in = False
+    st.session_state.username = ""
+    st.session_state.role = ""
+    
+    # Clear cookies by deleting them
+    cookies.pop("logged_in", None)
+    cookies.pop("username", None)
+    cookies.pop("role", None)
+    
+    # Reload the page to show the login form
+    st.experimental_rerun()
 
 def hod_home():
     st.title(f"Welcome HOD: {st.session_state.username}")
@@ -117,10 +108,10 @@ def faculty_home():
     if st.sidebar.button("Logout"):
         logout()
 
-    available_pages = ["Help","THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED","PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY","FUNDED PROJECTS","FELLOWSHIP/AWARD","OTHER INFORMATION","NUMBER OF LEAVES AVAILED", "Retrieve", "Notifications","Issues"]
+    available_pages = ["Help", "THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED", "PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY", "FUNDED PROJECTS", "FELLOWSHIP/AWARD", "OTHER INFORMATION", "NUMBER OF LEAVES AVAILED", "Retrieve", "Notifications", "Issues"]
     nav = st.sidebar.radio("Navigation", available_pages)
 
-    if nav =="Help":
+    if nav == "Help":
         help.main()
     elif nav == "THEORY COURSES HANDLED":
         l1.main(st.session_state.username)
@@ -136,7 +127,7 @@ def faculty_home():
         l6.main(st.session_state.username)
     elif nav == "FDPs ORGANIZED":
         l7.main(st.session_state.username)
-    elif nav == "FDPs ORGANIZED":
+    elif nav == "PROFESSION ROLES":
         l8.main(st.session_state.username)
     elif nav == "STUDENT COUNSELLING / MENTORING":
         l9.main(st.session_state.username)
@@ -173,14 +164,13 @@ def faculty_home():
     elif nav == "Issues":
         issues.main(st.session_state.username)
 
-
 def admin_home():
     st.title(f"Welcome Admin: {st.session_state.username}")
 
     if st.sidebar.button("Logout"):
         logout()
 
-    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User","Issues"])
+    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User", "Issues"])
 
     if nav == "Add User":
         add_user_form()
@@ -232,55 +222,39 @@ def suspend_user_form():
                         {"username": suspend_username},
                         {"$set": {"role": "Suspended"}}
                     )
-                    if result.matched_count > 0:
-                        st.success(f"User '{suspend_username}' has been suspended successfully!")
+                    if result.modified_count > 0:
+                        st.success(f"User {suspend_username} suspended successfully!")
                     else:
-                        st.warning(f"User '{suspend_username}' not found.")
+                        st.error(f"User {suspend_username} not found.")
                 except Exception as e:
                     st.error(f"Error suspending user: {e}")
             else:
                 st.warning("Please enter a username.")
 
 def show_faculty_details():
-    # Retrieve the department of the logged-in HOD
-    if st.session_state.role == "HOD":
-        hod_department = db['users'].find_one({"username": st.session_state.username})['department']
-        # Filter users based on the HOD's department
-        users = db['users'].find({"department": hod_department})
-        
-        # Define the columns to display
-        columns_to_display = ["username", "role", "department"]
-    else:
-        # For other roles, display all users
-        users = db['users'].find()
-        columns_to_display = ["username", "password", "role", "department"]
-    
-    # Convert the result to a DataFrame
-    df = pd.DataFrame(list(users), columns=["username", "password", "role", "department"])
-    
-    # Display the DataFrame with selected columns
-    st.write(df[columns_to_display])
+    st.subheader("Faculty Details")
 
-def show_page(page_name):
     try:
-        module = importlib.import_module(page_name)
-        module.main()
-    except ModuleNotFoundError:
-        st.error(f"Page '{page_name}' not found.")
+        faculty_data = db['faculty'].find()
+        faculty_df = pd.DataFrame(list(faculty_data))
+        st.dataframe(faculty_df)
+    except Exception as e:
+        st.error(f"Error retrieving faculty details: {e}")
 
-def logout():
-    st.session_state.logged_in = False
-    st.session_state.username = ""
-    st.experimental_rerun()
+def main():
+    if st.session_state.logged_in:
+        role = st.session_state.role
 
-if not st.session_state.logged_in:
-    login()
-else:
-    if st.session_state.role == "HOD":
-        hod_home()
-    elif st.session_state.role == "Principal":
-        principal_home()
-    elif st.session_state.role == "Faculty":
-        faculty_home()
-    elif st.session_state.role == "Admin":
-        admin_home()
+        if role == "HOD":
+            hod_home()
+        elif role == "Principal":
+            principal_home()
+        elif role == "Faculty":
+            faculty_home()
+        elif role == "Admin":
+            admin_home()
+    else:
+        login()
+
+if __name__ == "__main__":
+    main()

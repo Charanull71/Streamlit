@@ -9,7 +9,10 @@ collection = db['l16']  # Replace 'l16' with your actual collection name
 collection_users = db['users']
 
 # Define points for each patent type
-PATENT_POINTS = {
+
+
+def calculate_points(patent_type, patent_category):
+    PATENT_POINTS = {
     "Obtained": {
         "International": 100,
         "National": 80,
@@ -22,45 +25,39 @@ PATENT_POINTS = {
         "State": 40,
         "Local": 20
     }
-}
-
-def calculate_points(patent_type, patent_category):
+    }
     return PATENT_POINTS[patent_type].get(patent_category, 0)
 
 def main(username):
+    st.title("PATENTS")
+
     with st.form("l16"):
-        st.title("PATENTS")
+        # Section for patents filed/obtained up to previous assessment year
+        st.subheader("No. Of PATENTS Filed/Obtained up to previous assessment year")
+        n1 = st.text_input("No. Of PATENTS Filed:", value="", placeholder="Enter number of patents filed up to previous assessment year")
+        n2 = st.text_input("No. Of PATENTS Obtained:", value="", placeholder="Enter number of patents obtained up to previous assessment year")
 
-        n1 = st.text_input("No. Of PATENTS Filed upto previous assessment year:")
-        n2 = st.text_input("No. Of PATENTS obtained upto previous assessment year:")
-        
-        st.write("PATENTS Published in present assessment year:")
-        sop = st.text_input("Status Of Patent", value="", placeholder="Enter Status Of Patent")
-        dof = st.date_input("Date of Registration", (datetime.datetime.now()), format="MM.DD.YYYY")
-        iss = st.text_input("Description Of Patent", value="", placeholder="Enter Description of patent")
+        # Section for patents filed/obtained in present assessment year
+        st.subheader("No. Of PATENTS Filed/Obtained in present assessment year")
+        status_of_patent = st.selectbox("Status of Patent", ["", "Filed", "Obtained"])
+        level_of_patent = st.selectbox("Level of Patent", ["", "International", "National", "State", "Local"])
+        date_of_filing = st.date_input("Date of Filing", value=datetime.datetime.now(), format="YYYY-MM-DD")
+        description_of_patent = st.text_area("Description of Patent", value="", placeholder="Enter description of the patent")
 
-        # Dropdown for patent filed
-        filed_type = st.selectbox("Patent Filed Type", options=["International", "National", "State", "Local"])
-        filed_points = calculate_points("Filed", filed_type)
-
-        # Dropdown for patent obtained
-        obtained_type = st.selectbox("Patent Obtained Type", options=["International", "National", "State", "Local"])
-        obtained_points = calculate_points("Obtained", obtained_type)
-
-        # Display points
-
-
+        if status_of_patent and level_of_patent:
+            points = calculate_points(status_of_patent, level_of_patent)
+        else:
+            points = 0
         if st.form_submit_button("Submit"):
             # Check for empty fields
-            if not (n1 and n2 and sop and iss):
+            if not (n1 and n2 and status_of_patent and level_of_patent and description_of_patent):
                 st.error("Please fill out all required fields.")
                 return
-            
+
             try:
                 # Convert date to datetime.datetime
-                dof = datetime.datetime.combine(dof, datetime.datetime.min.time())
-                username = st.session_state.username  # Replace with your actual way of getting username
-                
+                date_of_filing = datetime.datetime.combine(date_of_filing, datetime.datetime.min.time())
+
                 # Query users collection to get department for the specified username
                 user_data = collection_users.find_one({"username": username})
                 if user_data:
@@ -73,14 +70,12 @@ def main(username):
                     "username": username,
                     "patents_filed_previous": n1,
                     "patents_obtained_previous": n2,
-                    "status_of_patent": sop,
-                    "date_of_registration": dof,
-                    "description_of_patent": iss,
+                    "status_of_patent": status_of_patent,
+                    "level_of_patent": level_of_patent,
+                    "date_of_filing": date_of_filing,
+                    "description_of_patent": description_of_patent,
                     "department": department,
-                    "filed_type": filed_type,
-                    "filed_points": filed_points,
-                    "obtained_type": obtained_type,
-                    "obtained_points": obtained_points,
+                    "points": points,
                     "date": datetime.datetime.now()
                 }
                 collection.insert_one(data)

@@ -9,13 +9,14 @@ collection = db['l18']  # Replace 'l18' with your actual collection name
 collection_users = db['users']
 
 # Define points for each position in the team
-POSITION_POINTS = {
+
+
+def calculate_points(position):
+    POSITION_POINTS = {
     "Single": 100,
     "First or Principle person": 50,
     "Other Persons": 10
 }
-
-def calculate_points(position):
     return POSITION_POINTS.get(position, 0)
 
 def main(username):

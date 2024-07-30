@@ -2,3 +2,6 @@ streamlit
 pymongo
 reportlab
 PyPDF2
+streamlit-authenticator
+streamlit-cookies-manager
+

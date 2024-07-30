@@ -6,7 +6,7 @@ from pymongo import MongoClient
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 collection = db['l21']
-
+collection_users = db['users']
 def main(username):
     # st.set_page_config(page_title="Streamlit Ph.D. Details Form", page_icon="🎓")
 
@@ -33,7 +33,18 @@ def main(username):
     if st.button("Submit"):
         # Validate and store Ph.D. details in MongoDB
         try:
+            username = st.session_state.username  # Replace with your actual way of getting username
+
+                # Query users collection to get department for the specified username
+            user_data = collection_users.find_one({"username": username})
+            if user_data:
+                department = user_data.get("department", "")
+            else:
+                st.error("Username not found in users collection.")
+                return
             data = {
+                "username":st.session_state.username,
+                "department":department,
                 "phd_holder": phd_holder,
                 "year_of_registration": year_of_registration,
                 "course_files_submitted": course_files_submitted,

@@ -1,5 +1,10 @@
 import connection
 import streamlit as st
+st.set_page_config(
+    page_title="Emploee Appraisal System",  # Title of the page
+    page_icon="📝",  # Icon to display in the browser tab (can be an emoji or path to an image file)
+    layout="centered"  # Optional: 'wide' for full-width layout, 'centered' for centered layout
+)
 st.markdown("""
     <style>
         .st-emotion-cache-1huvf7z ef3psqc5{
@@ -24,7 +29,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 st.subheader("Welcome to EvalMaster - Employee Appraisal Systems")
-st.image('logo2.png')
+st.image('logo2.png',width=700)
 st.markdown("""
         <div class="justified-text">
             To streamline and modernize the faculty appraisal process, our college has developed an
@@ -54,6 +59,8 @@ st.markdown("""
             text-align: right;
             padding: 10px;
             font-size: 12px;
+            color: gray;
+            font-weight: bold;
         }
     </style>
     <div class="footer">

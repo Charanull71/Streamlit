@@ -31,9 +31,9 @@ def main(username):
         n1 = st.text_input("No. Of Books Published up to the previous assessment year:")
         st.write("Books Published in present assessment year:")
         aut = st.text_input("No of authors", value="", placeholder="Enter Number of Authors")
-        pos = st.text_input("Position of authorship", value="", placeholder="Enter Position of authorship (e.g., 1st author, co-author)")
+        pos = st.selectbox("Position of authorship", ["1st author", "Co-author", "Other author"])
         iss = st.selectbox("ISSN/ISBN No.", ["", "YES", "NO"])
-        lph = st.text_input("Level of Publishing House", value="", placeholder="Enter Level of Publishing House (e.g., International Publisher, National Publisher)")
+        lph = st.selectbox("Level of Publishing House", ["International Publisher", "National Publisher"])
         tpb = st.text_input("Title and other particulars of the book", value="", placeholder="Enter Title and other particulars of the book")
 
         if st.form_submit_button("Submit"):

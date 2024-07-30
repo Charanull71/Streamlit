@@ -6,7 +6,7 @@ from pymongo import MongoClient
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 collection = db['l20']
-
+collection_users = db['users']
 # Point calculation based on award type
 def calculate_points(award_type):
     if award_type == "International":
@@ -25,8 +25,8 @@ def main(username):
 
     st.title("FELLOWSHIP/AWARD")
 
-    total_received_previous = st.text_input("No. Of Fellowship/Awards received upto previous assessment year (in Rs.)", value="", key="total_received_previous")
-    st.text("")
+    # total_received_previous = st.text_input("No. Of Fellowship/Awards received upto previous assessment year (in Rs.)", value="", key="total_received_previous")
+    # st.text("")
 
     award_name = st.text_input("Fellowship/Award Name", value="", key="award_name")
     award_type = st.selectbox("Fellowship/Award Type", ("International", "National", "State Level", "University Level"), key="award_type")
@@ -39,7 +39,18 @@ def main(username):
             return
 
         try:
+            username = st.session_state.username  # Replace with your actual way of getting username
+
+                # Query users collection to get department for the specified username
+            user_data = collection_users.find_one({"username": username})
+            if user_data:
+                department = user_data.get("department", "")
+            else:
+                st.error("Username not found in users collection.")
+                return
             data = {
+                "username":st.session_state.username,
+                "department":department,
                 "award_name": award_name,
                 "award_type": award_type,
                 "points": points,
