@@ -21,25 +21,14 @@ def main(username):
 
     st.title("FUNDED PROJECTS")
     st.subheader("Funded Projects in the present assessment year")
-<<<<<<< HEAD
-    #num_projects = st.number_input("Number of Projects", value=0, min_value=0, max_value=10, step=1)
-
-    
-    title = st.text_input("Title of Project", value="", placeholder="Enter Title")
-=======
     title = st.text_input("Title of Project", value="", placeholder="Enter Title")
     position = st.selectbox("Position in the team", ("Single", "First or Principal Person", "Other Persons"))
->>>>>>> e956f46740e95cc010f51b1fa1feac2a4d1f466a
     funded_by = st.text_input("Funded by", value="", placeholder="Enter Funding Source")
     period_from = st.date_input("Period From")
     period_to = st.date_input("Period To")
     grant_amount = st.text_input("Grant/Amount Mobilised", value="", placeholder="Enter Amount")
     pi_option = st.selectbox("Are you PI?", ("Yes", "No"))
-<<<<<<< HEAD
-       
-=======
     
->>>>>>> e956f46740e95cc010f51b1fa1feac2a4d1f466a
 
     if st.button("Submit"):
         # Validate and store project data in MongoDB
