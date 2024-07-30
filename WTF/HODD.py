@@ -21,7 +21,7 @@ def main(username):
     st.title(f"Retrieve Data for Department: {hod_department.upper()}")
     
     with st.form("retrieve_form"):
-        table = st.selectbox("Select Table", ["l1", "l2", "l3", "l4", "l5", "ll1", "ll2", "ll3", "ll4", "ll5", "ll6", "lll1", "lll2", "lll3", "lll4", "lll5", "lll6", "lll7"])
+        table = st.selectbox("Select Table", ["l1", "l2", "l3", "l4", "l5", "ll1", "ll2", "ll3", "ll4", "ll5", "ll6", "lll1", "l13", "lll3", "lll4", "lll5", "lll6", "lll7"])
         
         # Date filter inputs
         start_date = st.date_input("Start Date")
