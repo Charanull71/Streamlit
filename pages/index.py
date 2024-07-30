@@ -1,25 +1,28 @@
 import streamlit as st
 from pymongo import MongoClient
 import pandas as pd
+from streamlit_cookies_manager import EncryptedCookieManager
 from WTF import help, issues, adminissue, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD, sent, r, pdf
-st.set_page_config(
-    page_title="Emploee Appraisal System",  # Title of the page
-    page_icon="📝",  # Icon to display in the browser tab (can be an emoji or path to an image file)
-    layout="centered"  # Optional: 'wide' for full-width layout, 'centered' for centered layout
-)
-# MongoDB connection
+
+# Initialize EncryptedCookieManager with required 'password'
+cookies = EncryptedCookieManager(password="a$tr0ngP@ssw0rdTh@tIsS3cur3")
+
+# Check if cookies are loaded
+if not cookies.ready:
+    st.warning("Cookies are not loaded. Please check your configuration.")
+
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 
-# Initialize session state variables if not already set
+# Check if session state variables are set using cookies
 if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-if "role" not in st.session_state:
-    st.session_state.role = ""
+    st.session_state.logged_in = cookies.get("logged_in") == "True"
 
 if "username" not in st.session_state:
-    st.session_state.username = ""
+    st.session_state.username = cookies.get("username")
+
+if "role" not in st.session_state:
+    st.session_state.role = cookies.get("role")
 
 def login():
     st.title("Login")
@@ -36,8 +39,13 @@ def login():
             else:
                 st.session_state.logged_in = True
                 st.session_state.username = username
-                st.session_state.role = role
                 st.session_state.password = password
+                st.session_state.role = role
+
+                # Set cookies
+                cookies["logged_in"] = "True"
+                cookies["username"] = username
+                cookies["role"] = role
                 st.experimental_rerun()
         else:
             st.error("Invalid username, password, or role")
@@ -46,6 +54,13 @@ def logout():
     st.session_state.logged_in = False
     st.session_state.username = ""
     st.session_state.role = ""
+    
+    # Clear cookies by deleting them
+    cookies.pop("logged_in", None)
+    cookies.pop("username", None)
+    cookies.pop("role", None)
+    
+    # Reload the page to show the login form
     st.experimental_rerun()
 
 def hod_home():
@@ -207,37 +222,39 @@ def suspend_user_form():
                         {"username": suspend_username},
                         {"$set": {"role": "Suspended"}}
                     )
-                    if result.matched_count > 0:
-                        st.success(f"User '{suspend_username}' has been suspended successfully!")
+                    if result.modified_count > 0:
+                        st.success(f"User {suspend_username} suspended successfully!")
                     else:
-                        st.warning(f"User '{suspend_username}' not found.")
+                        st.error(f"User {suspend_username} not found.")
                 except Exception as e:
                     st.error(f"Error suspending user: {e}")
             else:
-                st.warning("Please enter a username to suspend.")
+                st.warning("Please enter a username.")
 
 def show_faculty_details():
-    hod_department = st.session_state.department
+    st.subheader("Faculty Details")
 
-    users = db['users'].find({"department": hod_department, "role": "Faculty"})
-    df = pd.DataFrame(list(users))
-    if not df.empty:
-        st.dataframe(df)
-    else:
-        st.write("No faculty details available.")
+    try:
+        faculty_data = db['faculty'].find()
+        faculty_df = pd.DataFrame(list(faculty_data))
+        st.dataframe(faculty_df)
+    except Exception as e:
+        st.error(f"Error retrieving faculty details: {e}")
 
 def main():
-    if not st.session_state.logged_in:
-        login()
-    else:
-        if st.session_state.role == "HOD":
+    if st.session_state.logged_in:
+        role = st.session_state.role
+
+        if role == "HOD":
             hod_home()
-        elif st.session_state.role == "Principal":
+        elif role == "Principal":
             principal_home()
-        elif st.session_state.role == "Faculty":
+        elif role == "Faculty":
             faculty_home()
-        elif st.session_state.role == "Admin":
+        elif role == "Admin":
             admin_home()
+    else:
+        login()
 
 if __name__ == "__main__":
     main()
