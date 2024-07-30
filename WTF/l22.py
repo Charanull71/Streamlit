@@ -6,6 +6,7 @@ from pymongo import MongoClient
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 collection = db['l22']
+collection_users = db['users']
 def main(username):
     # st.set_page_config(page_title="Streamlit Leaves Availed Form", page_icon="🌿")
 
@@ -27,7 +28,18 @@ def main(username):
     if st.button("Submit"):
         # Validate and store leaves availed details in MongoDB
         try:
+            username = st.session_state.username  # Replace with your actual way of getting username
+
+                # Query users collection to get department for the specified username
+            user_data = collection_users.find_one({"username": username})
+            if user_data:
+                department = user_data.get("department", "")
+            else:
+                st.error("Username not found in users collection.")
+                return
             data = {
+                "username":st.session_state.username,
+                "department":department,
                 "from_date": from_date.strftime('%Y-%m-%d') if isinstance(from_date, datetime.date) else None,
                 "to_date": to_date.strftime('%Y-%m-%d') if isinstance(to_date, datetime.date) else None,
                 "classes": classes,
