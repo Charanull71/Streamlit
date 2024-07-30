@@ -12,16 +12,15 @@ def main(username):
 
     st.title("FUNDED PROJECTS")
     st.subheader("Funded Projects in the present assessment year")
-    num_projects = st.number_input("Number of Projects", value=0, min_value=0, max_value=10, step=1)
+    #num_projects = st.number_input("Number of Projects", value=0, min_value=0, max_value=10, step=1)
 
-    for i in range(num_projects):
-        st.subheader(f"Project {i+1}")
-        title = st.text_input("Title of Project", value="", placeholder="Enter Title")
-        funded_by = st.text_input("Funded by", value="", placeholder="Enter Funding Source")
-        period_from = st.date_input("Period From")
-        period_to = st.date_input("Period To")
-        grant_amount = st.text_input("Grant/Amount Mobilised", value="", placeholder="Enter Amount")
-        pi_option = st.selectbox("Are you PI?", ("Yes", "No"))
+    
+    title = st.text_input("Title of Project", value="", placeholder="Enter Title")
+    funded_by = st.text_input("Funded by", value="", placeholder="Enter Funding Source")
+    period_from = st.date_input("Period From")
+    period_to = st.date_input("Period To")
+    grant_amount = st.text_input("Grant/Amount Mobilised", value="", placeholder="Enter Amount")
+    pi_option = st.selectbox("Are you PI?", ("Yes", "No"))
        
 
     if st.button("Submit"):

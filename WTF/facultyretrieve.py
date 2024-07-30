@@ -8,6 +8,8 @@ client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster
 db = client['Streamlit']
 collection_users = db['users']
 collection1 = db['l1']
+collection2 = db['l2']
+collection3 = db['l3']
 collection4 = db['l4']
 collection5 = db['l5']
 collection6 = db['l6']
@@ -341,6 +343,46 @@ def fetch_row_data_collection1(row_id):
 def update_data_collection1(row_id, new_data):
     try:
         update_result = collection1.find_one_and_update(
+            {"_id": ObjectId(row_id)},
+            {"$set": new_data},
+            return_document=True
+        )
+        return update_result is not None
+    except Exception as e:
+        st.error(f"Error updating data: {e}")
+        return False
+# collection2
+def fetch_all_data_collection2(username):
+    return list(collection2.find({"username": username}))
+
+# Function to fetch row data from collection1
+def fetch_row_data_collection2(row_id):
+    return collection2.find_one({"_id": ObjectId(row_id)})
+
+# Function to update data in collection1
+def update_data_collection2(row_id, new_data):
+    try:
+        update_result = collection2.find_one_and_update(
+            {"_id": ObjectId(row_id)},
+            {"$set": new_data},
+            return_document=True
+        )
+        return update_result is not None
+    except Exception as e:
+        st.error(f"Error updating data: {e}")
+        return False
+# collection3
+def fetch_all_data_collection3(username):
+    return list(collection3.find({"username": username}))
+
+# Function to fetch row data from collection1
+def fetch_row_data_collection3(row_id):
+    return collection3.find_one({"_id": ObjectId(row_id)})
+
+# Function to update data in collection1
+def update_data_collection3(row_id, new_data):
+    try:
+        update_result = collection3.find_one_and_update(
             {"_id": ObjectId(row_id)},
             {"$set": new_data},
             return_document=True
@@ -1453,7 +1495,7 @@ def main(username):
     elif collection_choice == "Research Guidance":
         st.header("Research Guidance")
         st.subheader("All Entries")
-        username_input = st.text_input("Enter Username", value=st.session_state.get("username", ""))
+        username_input = st.text_input("Enter Username", value=st.session_state.get("username", ""),disabled=True)
         if username_input:
             data_l14 = fetch_all_data_collection14(username_input)
             if data_l14:
@@ -1474,7 +1516,7 @@ def main(username):
             else:
                st.write("No data found")
         if 'current_row_id' in st.session_state:
-            display_form_collection13(row_data=st.session_state.current_data, row_id=st.session_state.current_row_id)
+            display_form_collection14(row_data=st.session_state.current_data, row_id=st.session_state.current_row_id)
 
 
 # Run the main function with a test username
