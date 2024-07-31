@@ -8,12 +8,8 @@ client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster
 db = client['Streamlit']
 collection_users = db['users']
 collection1 = db['l1']
-<<<<<<< HEAD
-collection2 = db['l2']
-=======
 collection2_btech = db['l2_btech']
 collection2_mtech = db['l2_mtech']
->>>>>>> e956f46740e95cc010f51b1fa1feac2a4d1f466a
 collection3 = db['l3']
 collection4 = db['l4']
 collection5 = db['l5']
@@ -459,51 +455,8 @@ def update_data_collection1(row_id, new_data):
     except Exception as e:
         st.error(f"Error updating data: {e}")
         return False
-<<<<<<< HEAD
-# collection2
-def fetch_all_data_collection2(username):
-    return list(collection2.find({"username": username}))
-
-# Function to fetch row data from collection1
-def fetch_row_data_collection2(row_id):
-    return collection2.find_one({"_id": ObjectId(row_id)})
-
-# Function to update data in collection1
-def update_data_collection2(row_id, new_data):
-    try:
-        update_result = collection2.find_one_and_update(
-            {"_id": ObjectId(row_id)},
-            {"$set": new_data},
-            return_document=True
-        )
-        return update_result is not None
-    except Exception as e:
-        st.error(f"Error updating data: {e}")
-        return False
-# collection3
-def fetch_all_data_collection3(username):
-    return list(collection3.find({"username": username}))
-
-# Function to fetch row data from collection1
-def fetch_row_data_collection3(row_id):
-    return collection3.find_one({"_id": ObjectId(row_id)})
-
-# Function to update data in collection1
-def update_data_collection3(row_id, new_data):
-    try:
-        update_result = collection3.find_one_and_update(
-            {"_id": ObjectId(row_id)},
-            {"$set": new_data},
-            return_document=True
-        )
-        return update_result is not None
-    except Exception as e:
-        st.error(f"Error updating data: {e}")
-        return False
-=======
 def fetch_all_data_collection2_btech(username):
     return list(collection2_btech.find({"username": username}))
->>>>>>> e956f46740e95cc010f51b1fa1feac2a4d1f466a
 
 # Function to fetch row data from collection1
 def fetch_row_data_collection2_btech(row_id):
@@ -2540,8 +2493,6 @@ def main(username):
                st.write("No data found")
         if 'current_row_id' in st.session_state:
             display_form_collection14(row_data=st.session_state.current_data, row_id=st.session_state.current_row_id)
-<<<<<<< HEAD
-=======
     elif collection_choice == "Book Publications":
         st.header("Book Publications")
 
@@ -2752,7 +2703,6 @@ def main(username):
                 st.write("No data found.")
         if 'current_row_id' in st.session_state:
             display_form_collection22(row_data=st.session_state.current_data, row_id=st.session_state.current_row_id)
->>>>>>> e956f46740e95cc010f51b1fa1feac2a4d1f466a
 
 
 # Run the main function with a test username

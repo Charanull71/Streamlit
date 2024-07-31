@@ -1,116 +1,109 @@
 import streamlit as st
+import pandas as pd
 from pymongo import MongoClient
-import gridfs
 from datetime import datetime
-import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
-# Connect to MongoDB
+# MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
-db = client['Streamlit']
+db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
 
 # Collections with file fields and their respective fields
 collections_with_files = {
-    "l5": "certificate_file",
-    "l6": "certificate_file",
-    "l8": "certificate_file",
-    "l10": "certificate_file",
-    "l11": "file_uploader",
+    "l5": ["certificate_file"],
+    "l6": ["certificate_file"],
+    "l8": ["certificate_file"],
+    "l10": ["certificate_file"],
+    "l11": ["file_uploader"],
     "l12": ["pdf_uploader1", "pdf_uploader2"],
-    "l13": "pdf_uploader"
+    "l13": ["pdf_uploader"]
 }
 
-def get_collection_list():
-    return list(collections_with_files.keys())
+def date_to_datetime(date):
+    return datetime.combine(date, datetime.min.time())
 
-def download_file(gridfs_db, file_id):
-    fs = gridfs.GridFS(gridfs_db)
-    file = fs.get(file_id)
-    return file.read()
+def retrieve_data_from_collection(username, collection_name, start_date=None, end_date=None, file_fields=None):
+    collection = db[collection_name]
+    query = {"username": username}
+    
+    # Apply date filter to query    
+    if start_date and end_date:
+        start_datetime = date_to_datetime(start_date)
+        end_datetime = date_to_datetime(end_date)
+        query["timestamp"] = {"$gte": start_datetime, "$lte": end_datetime}
+    
+    projection = {"_id": 0}  # Exclude the id field
+    
+    if file_fields:
+        # Create a projection to include only specified file fields
+        projection.update({field: 1 for field in file_fields})
+    
+    data = list(collection.find(query, projection))
+    return data
 
 def main(username):
-    st.title("Retrieve Proof of Work PDFs")
+    st.title("Retrieval and Notification Page")
 
-    # Select collection
-    collection = st.selectbox("Select a Collection", get_collection_list())
+    # Simulate the logged-in user's username
+    if "logged_in_username" not in st.session_state:
+        st.session_state.logged_in_username = username  # Replace this with actual login logic
 
-    # Date filter
-    from_date = st.date_input("From Date", value=datetime(2022, 1, 1))
-    to_date = st.date_input("To Date", value=datetime.now())
+    username = st.session_state.logged_in_username
+    
+    st.text_input("Logged-in Username:", username, disabled=True)
+    
+    # Date filter inputs
+    start_date = st.date_input("Start Date")
+    end_date = st.date_input("End Date")
+    
+    # Select collection(s) to retrieve data from
+    selected_collections = st.multiselect("Select Collection(s)", list(collections_with_files.keys()), default=list(collections_with_files.keys()))
 
-    if from_date > to_date:
-        st.error("From Date cannot be greater than To Date")
-        return
-
-    # Convert date to datetime
-    from_datetime = datetime.combine(from_date, datetime.min.time())
-    to_datetime = datetime.combine(to_date, datetime.max.time())
-
-    # Logging the query
-    logging.debug(f"Querying collection: {collection}")
-    logging.debug(f"From date: {from_datetime}")
-    logging.debug(f"To date: {to_datetime}")
-    logging.debug(f"Username: {username}")
-
-    # Fetch data from MongoDB based on selected collection, date filter, and username
-    if collection and st.button("Retrieve Data"):
-        coll = db[collection]
-        query = {
-            "username": username,
-            "upload_date": {"$gte": from_datetime, "$lte": to_datetime}
-        }
-
-        logging.debug(f"Query: {query}")
-
+    # Flags to track if data retrieval buttons were clicked
+    retrieve_clicked = False
+    retrieve_all_clicked = False
+    
+    # Use st.columns() to place buttons side by side
+    col1, col2 = st.columns(2)
+    
+    # "Retrieve" button
+    if col1.button("Retrieve"):
+        retrieve_clicked = True
         try:
-            docs = list(coll.find(query))
+            for collection_name in selected_collections:
+                st.subheader(f"Collection: {collection_name.upper()}")
+                
+                file_fields = collections_with_files[collection_name]
+                data = retrieve_data_from_collection(username, collection_name, start_date, end_date, file_fields)
+                
+                if not data:
+                    st.warning(f"No data found for username '{username}' in collection '{collection_name}'.")
+                else:
+                    df = pd.DataFrame(data)
+                    st.dataframe(df)
+                    st.write("")  # Empty line for spacing
+            
         except Exception as e:
-            logging.error(f"Error querying collection: {e}")
-            st.error(f"Error querying collection: {e}")
-            return
+            st.error(f"An error occurred: {e}")
 
-        logging.debug(f"Number of documents found: {len(docs)}")
-        for doc in docs:
-            logging.debug(doc)
-
-        if len(docs) == 0:
-            st.warning("No records found for the selected criteria.")
-            return
-
-        for doc in docs:
-            st.write(doc)
-            file_fields = collections_with_files[collection]
-            if isinstance(file_fields, list):
-                for field in file_fields:
-                    if field in doc:
-                        file_id = doc[field]
-                        try:
-                            st.download_button(
-                                label=f"Download {field}",
-                                data=download_file(db, file_id),
-                                file_name=f"{collection}_{field}_{str(file_id)}.pdf",
-                                mime="application/pdf"
-                            )
-                        except Exception as e:
-                            logging.error(f"Error downloading file: {e}")
-                            st.error(f"Error downloading file: {e}")
-            else:
-                if file_fields in doc:
-                    file_id = doc[file_fields]
-                    try:
-                        st.download_button(
-                            label=f"Download {file_fields}",
-                            data=download_file(db, file_id),
-                            file_name=f"{collection}_{file_fields}_{str(file_id)}.pdf",
-                            mime="application/pdf"
-                        )
-                    except Exception as e:
-                        logging.error(f"Error downloading file: {e}")
-                        st.error(f"Error downloading file: {e}")
+    # "Retrieve All Data" button
+    if col2.button("Retrieve All Data"):
+        retrieve_all_clicked = True
+        try:
+            for collection_name in selected_collections:
+                st.subheader(f"Collection: {collection_name.upper()}")
+                
+                file_fields = collections_with_files[collection_name]
+                data = retrieve_data_from_collection(username, collection_name, file_fields=file_fields)
+                
+                if not data:
+                    st.warning(f"No data found for username '{username}' in collection '{collection_name}'.")
+                else:
+                    df = pd.DataFrame(data)
+                    st.dataframe(df)
+                    st.write("")  # Empty line for spacing
+            
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    if 'username' in st.session_state:
-        main(st.session_state.username)
-    else:
-        st.error("No user logged in. Please log in to retrieve data.")
+    main(st.session_state.username)
