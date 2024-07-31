@@ -172,12 +172,14 @@ def admin_home():
     if st.sidebar.button("Logout"):
         logout()
 
-    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User", "Issues"])
+    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User","Pdf View", "Issues"])
 
     if nav == "Add User":
         add_user_form()
     elif nav == "Suspend User":
         suspend_user_form()
+    elif nav == "Pdf View":
+        pdf.main()
     elif nav == "Issues":
         adminissue.main()
 
