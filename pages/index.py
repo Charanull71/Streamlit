@@ -3,7 +3,11 @@ from pymongo import MongoClient
 import pandas as pd
 from streamlit_cookies_manager import EncryptedCookieManager
 from WTF import help, issues, adminissue, proofret,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD, sent, r, pdf
-
+st.set_page_config(
+    page_title="Emploee Appraisal System",  # Title of the page
+    page_icon="📝",  # Icon to display in the browser tab (can be an emoji or path to an image file)
+    layout="centered"  # Optional: 'wide' for full-width layout, 'centered' for centered layout
+)
 # Initialize EncryptedCookieManager with required 'password'
 cookies = EncryptedCookieManager(password="a$tr0ngP@ssw0rdTh@tIsS3cur3")
 
