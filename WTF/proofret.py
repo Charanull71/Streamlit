@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 from pymongo import MongoClient
 from datetime import datetime
+from PyPDF2 import PdfMerger
+import base64
+import io
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
@@ -40,6 +43,21 @@ def retrieve_data_from_collection(username, collection_name, start_date=None, en
     data = list(collection.find(query, projection))
     return data
 
+def decode_base64_file(encoded_data):
+    return base64.b64decode(encoded_data)
+
+def create_pdf_from_decoded_files(decoded_files):
+    merger = PdfMerger()
+    for pdf in decoded_files:
+        pdf_stream = io.BytesIO(pdf)
+        merger.append(pdf_stream)
+    
+    output = io.BytesIO()
+    merger.write(output)
+    merger.close()
+    
+    return output
+
 def main(username):
     st.title("Retrieval and Notification Page")
 
@@ -58,36 +76,46 @@ def main(username):
     # Select collection(s) to retrieve data from
     selected_collections = st.multiselect("Select Collection(s)", list(collections_with_files.keys()), default=list(collections_with_files.keys()))
 
-    # Flags to track if data retrieval buttons were clicked
-    retrieve_clicked = False
-    retrieve_all_clicked = False
-    
     # Use st.columns() to place buttons side by side
-    col1, col2 = st.columns(2)
+    col1, col2,col3 = st.columns(3)
     
     # "Retrieve" button
-    if col1.button("Retrieve"):
-        retrieve_clicked = True
-        try:
-            for collection_name in selected_collections:
-                st.subheader(f"Collection: {collection_name.upper()}")
+    if col1:
+    # if col1.button("Retrieve"):
+    #     try:
+    #         for collection_name in selected_collections:
+    #             st.subheader(f"Collection: {collection_name.upper()}")
                 
-                file_fields = collections_with_files[collection_name]
-                data = retrieve_data_from_collection(username, collection_name, start_date, end_date, file_fields)
+    #             file_fields = collections_with_files[collection_name]
+    #             data = retrieve_data_from_collection(username, collection_name, start_date, end_date, file_fields)
                 
-                if not data:
-                    st.warning(f"No data found for username '{username}' in collection '{collection_name}'.")
-                else:
-                    df = pd.DataFrame(data)
-                    st.dataframe(df)
+    #             if not data:
+    #                 st.warning(f"No data found for username '{username}' in collection '{collection_name}'.")
+    #             else:
+    #                 decoded_files = []
+    #                 for record in data:
+    #                     for field in file_fields:
+    #                         if field in record:
+    #                             encoded_data = record[field]
+    #                             decoded_file = decode_base64_file(encoded_data)
+    #                             decoded_files.append(decoded_file)
+                    
+    #                 if decoded_files:
+    #                     pdf_output = create_pdf_from_decoded_files(decoded_files)
+    #                     st.download_button(
+    #                         label=f"Download {collection_name.upper()} PDFs",
+    #                         data=pdf_output.getvalue(),
+    #                         file_name=f"{collection_name}.pdf",
+    #                         mime="application/pdf"
+    #                     )
+    
                     st.write("")  # Empty line for spacing
             
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+        # except Exception as e:
+        #     st.error(f"An error occurred: {e}")
 
     # "Retrieve All Data" button
     if col2.button("Retrieve All Data"):
-        retrieve_all_clicked = True
         try:
             for collection_name in selected_collections:
                 st.subheader(f"Collection: {collection_name.upper()}")
@@ -98,12 +126,28 @@ def main(username):
                 if not data:
                     st.warning(f"No data found for username '{username}' in collection '{collection_name}'.")
                 else:
-                    df = pd.DataFrame(data)
-                    st.dataframe(df)
+                    decoded_files = []
+                    for record in data:
+                        for field in file_fields:
+                            if field in record:
+                                encoded_data = record[field]
+                                decoded_file = decode_base64_file(encoded_data)
+                                decoded_files.append(decoded_file)
+                    
+                    if decoded_files:
+                        pdf_output = create_pdf_from_decoded_files(decoded_files)
+                        st.download_button(
+                            label=f"Download {collection_name.upper()} PDFs",
+                            data=pdf_output.getvalue(),
+                            file_name=f"{collection_name}.pdf",
+                            mime="application/pdf"
+                        )
                     st.write("")  # Empty line for spacing
             
         except Exception as e:
             st.error(f"An error occurred: {e}")
+    if col3:
+         st.write("")
 
 if __name__ == "__main__":
-    main(st.session_state.username)
+    main(st.session_state.username)  # Replace with dynamic username retrieval logic if available
