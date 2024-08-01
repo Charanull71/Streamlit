@@ -9,7 +9,8 @@ db = client['Streamlit']
 # Mapping table names to collection names
 table_mapping = {
     "Theory Courses Handled": "l1",
-    "Student Project Works Undertaken": "l2",
+    "Student Project Works Undertaken(B.Tech)": "l2_btech",
+    "Student Project Works Undertaken(M.Tech)": "l2_mtech",
     "Student Training Activities": "l3",
     "Learning Material": "l4",
     "Certificates Courses Done": "l5",
