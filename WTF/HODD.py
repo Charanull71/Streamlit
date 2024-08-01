@@ -6,6 +6,30 @@ from datetime import datetime
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 
+# Mapping table names to collection names
+table_mapping = {
+    "Theory Courses Handled": "l1",
+    "Student Project Works Undertaken": "l2",
+    "Student Training Activities": "l3",
+    "Learning Material": "l4",
+    "Certificates Courses Done": "l5",
+    "FDPs Attended": "l6",
+    "FDPs Organized": "l7",
+    "Memberships with Professional Bodies": "l8",
+    "Chairing Sessions & Delivering Talks and Lectures": "l9",
+    "Journal Publications": "l10",
+    "Conference Publications": "l11",
+    "Research Guidance": "l12",
+    "Book Publications": "l13",
+    "Patents": "l14",
+    "Product Design/Software Development": "l15",
+    "Consultancy": "l16",
+    "Funded Projects": "l17",
+    "Fellowship/Award": "l18",
+    "Ph.D. Details": "l19",
+    "Leaves Availed": "l20"
+}
+
 def date_to_datetime(date):
     return datetime.combine(date, datetime.min.time())
 
@@ -21,27 +45,7 @@ def main(username):
     st.title(f"Retrieve Data for Department: {hod_department.upper()}")
     
     with st.form("retrieve_form"):
-        table = st.selectbox("Select Table",
-         [ "Theory Courses Handled",
-           "Student Project Works Undertaken", 
-           "Student Training Activities", 
-           "Learning Material", 
-           "Certificates Courses Done", 
-           "FDPs Attended",
-            "FDPs Organized",
-            "Memberships with Professional Bodies",
-            "Chairing Sessions & Delivering Talks and Lectures",
-            "Journal Publications",
-            "Conference Publications",
-            "Research Guidance",
-            "Book Publications",
-            "Patents",
-            "Product Design/Software Development",
-            "Consultancy",
-            "Funded Projects",
-            "Fellowship/Award",
-            "Ph.D. Details",
-            "Leaves Availed"])
+        table = st.selectbox("Select Table", list(table_mapping.keys()))
         
         # Date filter inputs
         start_date = st.date_input("Start Date")
@@ -50,7 +54,8 @@ def main(username):
         submit_button = st.form_submit_button("Submit")
         
         if submit_button:
-            collection = db[table]
+            collection_name = table_mapping[table]
+            collection = db[collection_name]
             
             # Use regex to make the department query case-insensitive
             query = {"department": {"$regex": hod_department, "$options": "i"}}
@@ -76,3 +81,6 @@ def main(username):
 #     if nav == "Departmental Retrieve":
 #         import WTF.HODD as HODD
 #         HODD.main(st.session_state.username)
+
+# To run the app, call the main function with the username
+# main("example_username")
