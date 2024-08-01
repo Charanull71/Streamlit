@@ -136,9 +136,10 @@ def main(username):
     # Retrieve current logged-in user's role and department
     role, department = get_user_info(username)
 
-    selected_table = st.selectbox("Select Table", list(collections.keys()))
+    
 
     if role == "HOD":
+        selected_table = st.selectbox("Select Table", list(collections.keys()))
         plot_hod_data(department, selected_table)
     elif role == "Principal":
         dept_input = st.text_input("Enter Department").strip()
