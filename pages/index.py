@@ -176,7 +176,7 @@ def faculty_home():
     elif nav == "Notifications":
         notification.main(st.session_state.username)
     elif nav == "pdf view":
-        pdf.main(st.session_state.username)
+        pdf.main()
     elif nav == "Issues":
         issues.main(st.session_state.username)
     elif nav == "Graphical Analysis":
