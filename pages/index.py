@@ -2,7 +2,7 @@ import streamlit as st
 from pymongo import MongoClient
 import pandas as pd
 from streamlit_cookies_manager import EncryptedCookieManager
-from WTF import help, issues, adminissue,pl, proofret,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD, sent, r, pdf
+from WTF import help, issues, adminissue,pl,adminpow, proofret,pc,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD,HODDPOW, sent, r, pdf
 st.set_page_config(
     page_title="Emploee Appraisal System",  # Title of the page
     page_icon="📝",  # Icon to display in the browser tab (can be an emoji or path to an image file)
@@ -27,7 +27,9 @@ if "username" not in st.session_state:
 
 if "role" not in st.session_state:
     st.session_state.role = cookies.get("role")
-
+if "department" not in st.session_state and st.session_state.username:
+    user = db['users'].find_one({"username": st.session_state.username})
+    st.session_state.department = user.get("department") if user else ""
 def login():
     st.title("Login")
 
@@ -73,7 +75,7 @@ def hod_home():
     if st.sidebar.button("Logout"):
         logout()
 
-    nav = st.sidebar.radio("Navigation", ["Faculty Details", "Received", "Sent", "Retrieved Data", "Pdf View", "Departmental Retrieve"])
+    nav = st.sidebar.radio("Navigation", ["Faculty Details", "Received", "Sent", "Retrieved Data", "Pdf View", "Departmental Retrieve","Departmental POW Retrieve","Graph"])
 
     if nav == "Faculty Details":
         show_faculty_details()
@@ -87,6 +89,10 @@ def hod_home():
         retrieve.main()
     elif nav == "Departmental Retrieve":
         HODD.main(st.session_state.username)
+    elif nav == "Departmental POW Retrieve":
+        HODDPOW.main(st.session_state.username,st.session_state.role,st.session_state.department)
+    elif nav == "Graph":
+        pc.main(st.session_state.username)
 
 def principal_home():
     st.title(f"Welcome Principal: {st.session_state.username}")
@@ -94,7 +100,7 @@ def principal_home():
     if st.sidebar.button("Logout"):
         logout()
 
-    nav = st.sidebar.radio("Navigation", ["Faculty Details", "Received", "Pdf View", "Sent"])
+    nav = st.sidebar.radio("Navigation", ["Faculty Details", "Received", "Pdf View", "Graph","Sent"])
 
     if nav == "Faculty Details":
         show_faculty_details()
@@ -104,6 +110,8 @@ def principal_home():
         pdf.main()
     elif nav == "Sent":
         st.write("No sent page")
+    elif nav == "Graph":
+        pc.main(st.session_state.username)
 
 def faculty_home():
     st.image('img.png')
@@ -112,7 +120,7 @@ def faculty_home():
     if st.sidebar.button("Logout"):
         logout()
 
-    available_pages = ["Help", "THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED", "PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY", "FUNDED PROJECTS", "FELLOWSHIP/AWARD", "OTHER INFORMATION", "NUMBER OF LEAVES AVAILED", "POW Retrieve","Retrieve", "Notifications","Graphical Analysis", "Issues"]
+    available_pages = ["Help", "THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED", "PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY", "FUNDED PROJECTS", "FELLOWSHIP/AWARD", "OTHER INFORMATION", "NUMBER OF LEAVES AVAILED", "POW Retrieve","Retrieve", "Notifications","Graphical Analysis","Graphical Analysis - Detailed", "Issues"]
     nav = st.sidebar.radio("Navigation", available_pages)
 
     if nav == "Help":
@@ -170,6 +178,8 @@ def faculty_home():
     elif nav == "Issues":
         issues.main(st.session_state.username)
     elif nav == "Graphical Analysis":
+        pc.main(st.session_state.username)
+    elif nav == "Graphical Analysis - Detailed":
         pl.main(st.session_state.username)
 
 def admin_home():
@@ -178,7 +188,7 @@ def admin_home():
     if st.sidebar.button("Logout"):
         logout()
 
-    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User","Pdf View", "Issues"])
+    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User","Pdf View", "Issues","POW ADMIN"])
 
     if nav == "Add User":
         add_user_form()
@@ -188,6 +198,8 @@ def admin_home():
         pdf.main()
     elif nav == "Issues":
         adminissue.main()
+    elif nav == "POW ADMIN":
+        adminpow.main()
 
 def add_user_form():
     st.header("Add New User")
