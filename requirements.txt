@@ -5,8 +5,4 @@ PyPDF2
 streamlit-authenticator
 streamlit-cookies-manager
 plotly
-<<<<<<< HEAD
 pdfplumber
-=======
-pdfplumber
->>>>>>> 0987953f18bf37f2caa896db36a92fd40726fcb4
