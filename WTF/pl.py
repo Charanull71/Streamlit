@@ -276,5 +276,5 @@ def main(username):
         plot_user_data4(username)
         plot_user_data5(username)
 if __name__ == "__main__":
-    st.session_state.username = "devicharan"  # Replace with dynamic username retrieval logic if available
+     # Replace with dynamic username retrieval logic if available
     main(st.session_state.username)
