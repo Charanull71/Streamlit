@@ -13,8 +13,11 @@ def main(username):
     st.title("LEAVES AVAILED")
 
     # Date dropdowns for 'From' and 'To' dates
-    from_date = st.date_input("From Date")
-    to_date = st.date_input("To Date")
+    col1,col2 =st.columns(2)
+    with col1:
+        from_date = st.date_input("From Date")
+    with col2:
+        to_date = st.date_input("To Date")
 
     classes = st.number_input("Cls", min_value=0, step=1, value=0, key="classes")
     hp_classes = st.number_input("HP Cls", min_value=0, step=1, value=0, key="hp_classes")

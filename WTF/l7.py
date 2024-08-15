@@ -119,25 +119,28 @@ def main(username):
             label_visibility=st.session_state.visibility,
             disabled=st.session_state.disabled,
         )
-
-        funding_type = st.selectbox(
+        col1,col2 =st.columns(2)
+        with col1:
+            funding_type = st.selectbox(
             "Type of Funding",
             options=funding_types,
             label_visibility=st.session_state.visibility,
             disabled=st.session_state.disabled,
         )
-
-        capacity = st.selectbox(
+        with col2:
+            capacity = st.selectbox(
             "Organised in the Capacity of",
             options=capacities,
             label_visibility=st.session_state.visibility,
             disabled=st.session_state.disabled,
         )
-
-        frod = st.date_input("FDP STARTED DATE", today, format="MM.DD.YYYY")
-        tod = st.date_input("FDP END DATE", today, format="MM.DD.YYYY")
-        
-        days = st.text_input("No of Days", value="", placeholder="Enter Number of Days")
+        col1,col2,col3 =st.columns(3)
+        with col1:
+            frod = st.date_input("FDP STARTED DATE", today, format="MM.DD.YYYY")
+        with col2:
+            tod = st.date_input("FDP END DATE", today, format="MM.DD.YYYY")
+        with col3:
+            days = st.text_input("No of Days", value="", placeholder="Enter Number of Days")
         
         web_link = st.text_input("Enter Your FDP Web Link", value="", placeholder="Enter Web Link (e.g. https://example.com)")
 

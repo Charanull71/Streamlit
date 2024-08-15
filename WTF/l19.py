@@ -24,8 +24,11 @@ def main(username):
     title = st.text_input("Title of Project", value="", placeholder="Enter Title")
     position = st.selectbox("Position in the team", ("Single", "First or Principal Person", "Other Persons"))
     funded_by = st.text_input("Funded by", value="", placeholder="Enter Funding Source")
-    period_from = st.date_input("Period From")
-    period_to = st.date_input("Period To")
+    col1,col2 =st.columns(2)
+    with col1:
+        period_from = st.date_input("Period From")
+    with col2:
+        period_to = st.date_input("Period To")
     grant_amount = st.text_input("Grant/Amount Mobilised", value="", placeholder="Enter Amount")
     pi_option = st.selectbox("Are you PI?", ("Yes", "No"))
     

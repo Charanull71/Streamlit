@@ -62,14 +62,18 @@ def main(username):
             label_visibility=st.session_state.visibility,
             disabled=st.session_state.disabled,
         )
-        
-        title = st.text_input("Title of Event", value="", placeholder="Enter Event Title")
-        ht = st.text_input("Host Institution", value="", placeholder="Enter Host Institution")
-        
-        frod = st.date_input("FDP Started Date", today, format="MM.DD.YYYY")
-        tod = st.date_input("FDP Ended Date", today, format="MM.DD.YYYY")
-        
-        days = st.text_input("No of Days", value="", placeholder="Enter Event No of Days")
+        col1,col2 =st.columns(2)
+        with col1:
+            title = st.text_input("Title of Event", value="", placeholder="Enter Event Title")
+        with col2:
+            ht = st.text_input("Host Institution", value="", placeholder="Enter Host Institution")
+        col1,col2,col3 =st.columns(3)
+        with col1:
+            frod = st.date_input("FDP Started Date", today, format="MM.DD.YYYY")
+        with col2:
+            tod = st.date_input("FDP Ended Date", today, format="MM.DD.YYYY")
+        with col3:
+            days = st.text_input("No of Days", value="", placeholder="Enter Event No of Days")
         
         duration_options = [">=2W", "1W-2W", "<1W"]
         fdp_duration = st.selectbox(

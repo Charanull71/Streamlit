@@ -38,8 +38,11 @@ def main(username):
 
         n1 = st.text_input("No. Of STUDENTS Completed Ph.D/M.Phil:")
         st.write("No. Of STUDENTS doing Ph.D/M.Phil in present assessment year:")
-        deg = st.text_input("Degree", value="", placeholder="Enter Degree")
-        uni = st.text_input("University", value="", placeholder="Enter University")
+        col1,col2=st.columns(2)
+        with col1:
+            deg = st.text_input("Degree", value="", placeholder="Enter Degree")
+        with col2:
+            uni = st.text_input("University", value="", placeholder="Enter University")
         gui = st.selectbox("Guide/Co-Guide", ["", "Guide", "Co-Guide"])
         frod3 = st.date_input("Date of Registration", datetime.datetime.now().date(), format="YYYY-MM-DD")
         stype = st.text_input("Student Particulars", value="", placeholder="Enter Particulars Of Student")

@@ -98,7 +98,7 @@ def main(username):
 
     # Display warning message for 20 seconds
     # warning_message = "Before submitting, please cross check all of your information is correct and no errors, changes cannot be recognized faster!! We appreciate your careful behavior in your self-appraisal."
-    # with st.spinner("Read Warning Message...."):
+    # with st.spinner("Read Warning Message.... "):
     #     st.warning(warning_message, icon="⚠️")
     #     time.sleep(20)  # Wait for 20 seconds
 
@@ -108,17 +108,55 @@ def main(username):
 
     st.title("Theory Courses Handled")
     Subject = st.text_input("Subject", value="", placeholder="Enter Your Subject", disabled=st.session_state.disabled)
-    dep = st.text_input("Department", value="", placeholder="Department Name", disabled=st.session_state.disabled)
-    section = st.text_input("Class & Section", value="", placeholder="Enter Classname & Section || Example: 3 CSE B", disabled=st.session_state.disabled)
-    cp = st.text_input("Classes Planned", value="", placeholder="No. Of Classes Planned", disabled=st.session_state.disabled)
-    ch = st.text_input("Classes Held", value="", placeholder="No. Of Classes Held", disabled=st.session_state.disabled)
-    option1 = st.selectbox(
+    # section = st.text_input("Class & Section", value="", placeholder="Enter Classname & Section || Example: 3 CSE B", disabled=st.session_state.disabled)
+    
+    col1,col2,col3= st.columns(3)
+    with col1:
+        year = st.selectbox(
+        "Year",
+        ("1", "2", "3","4"),
+        label_visibility=st.session_state.visibility,
+        disabled=st.session_state.disabled,
+    )
+        
+        # st.text_input("Year", value="", placeholder="Year Name", disabled=st.session_state.disabled)
+    with col2:
+        dep =st.selectbox(
+        "Department",
+        ("CSE", "CSM", "CSD","ECE","EEE","IT","MECH","CIVIL"),
+        label_visibility=st.session_state.visibility,
+        disabled=st.session_state.disabled,
+    ) 
+
+        # st.text_input("Department", value="", placeholder="Department Name", disabled=st.session_state.disabled)
+    with col3:
+        section = st.selectbox(
+        "Section",
+        ("A", "B", "C","D","E","F",),
+        label_visibility=st.session_state.visibility,
+        disabled=st.session_state.disabled,
+    ) 
+        # st.text_input("Section", value="", placeholder="Enter Classname & Section || Example: 3 CSE B", disabled=st.session_state.disabled)
+    col2, col3 = st.columns(2)
+    with col2:
+        cp = st.text_input("Classes Planned", value="", placeholder="No. Of Classes Planned", disabled=st.session_state.disabled)
+    with col3:
+        ch = st.text_input("Classes Held", value="", placeholder="No. Of Classes Held", disabled=st.session_state.disabled)
+
+    
+    # section = st.text_input("Class & Section", value="", placeholder="Enter Classname & Section || Example: 3 CSE B", disabled=st.session_state.disabled)
+    # cp = st.text_input("Classes Planned", value="", placeholder="No. Of Classes Planned", disabled=st.session_state.disabled)
+    # ch = st.text_input("Classes Held", value="", placeholder="No. Of Classes Held", disabled=st.session_state.disabled)
+    col4, col5 = st.columns(2)
+    with col4:
+        option1 = st.selectbox(
         "Student Feedback (Cycle 1)",
         ("Excellent", "Good", "Satisfactory"),
         label_visibility=st.session_state.visibility,
         disabled=st.session_state.disabled,
     )
-    option2 = st.selectbox(
+    with col5:
+        option2 = st.selectbox(
         "Student Feedback (Cycle 2)",
         ("Excellent", "Good", "Satisfactory"),
         label_visibility=st.session_state.visibility,
@@ -138,7 +176,7 @@ def main(username):
                 "username": username,
                 "subject": Subject,
                 "department": dep,
-                "section": section,
+                "section": year+" "+dep+" "+section,
                 "classes_planned": cp,
                 "classes_held": ch,
                 "feedback1": option1,

@@ -25,9 +25,13 @@ def main(username):
         st.title("Chairing Sessions & Delivering Talks and Lectures")
 
         st.write("No. Of Chairing sessions and delivering talks & lectures up to previous assessment year:")
-        lec = st.text_input("Lectures", value="", placeholder="Enter Lectures")
-        dtalk = st.text_input("Delivering Talks", value="", placeholder="Enter Delivering Talks")
-        ctalks = st.text_input("Chairing Talks", value="", placeholder="Enter Chairing Talks")
+        col1,col2,col3=st.columns(3)
+        with col1:
+            lec = st.text_input("Lectures", value="", placeholder="Enter Lectures")
+        with col2:
+            dtalk = st.text_input("Delivering Talks", value="", placeholder="Enter Delivering Talks")
+        with col3:
+            ctalks = st.text_input("Chairing Talks", value="", placeholder="Enter Chairing Talks")
 
         st.write("No. Of Chairing sessions and delivering talks & lectures in present assessment year:")
         Subject = st.selectbox("Geographical Level of platform of delivery", [

@@ -26,9 +26,11 @@ def main(username):
 
         # Current assessment year products
         st.write("No. Of Products designed/developed in present assessment year:")
-        
-        nop = st.text_input("Name of Product / SW", value="", placeholder="Enter Name of Product / SW")
-        nof = st.text_input("No. Of Faculty in the team work", value="", placeholder="Enter No. Of Faculty in the team work")
+        col1,col2 =st.columns(2)
+        with col1:
+            nop = st.text_input("Name of Product / SW", value="", placeholder="Enter Name of Product / SW")
+        with col2:
+            nof = st.text_input("No. Of Faculty in the team work", value="", placeholder="Enter No. Of Faculty in the team work")
 
         pos = st.selectbox("Position in the team", options=["Single", "First or Principle person", "Other Persons"])
         pos_points = calculate_points(pos)

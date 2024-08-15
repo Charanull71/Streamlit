@@ -45,35 +45,37 @@ def main(username):
         value="",
         placeholder="Enter Your Subject"
     )
-
-    year = st.text_input(
+    col1,col2=st.columns(2)
+    with col1:
+        year = st.text_input(
         "Year",
         value="",
         placeholder="Enter the Year"
     )
-
-    dep = st.text_input(
+    with col2:
+        dep = st.text_input(
         "Department",
         value="",
         placeholder="Department Name"
     )
-
+    col1,col2=st.columns(2)
+    
     material_options = [
         "ICT Based teaching Material",
         "Interactive Courses/Online Courses",
         "Participatory Learning Modules/Teaching Notes"
     ]
-
-    typem = st.selectbox(
+    with col1:
+        typem = st.selectbox(
         "Type of Material Developed",
         options=material_options,
         label_visibility=st.session_state.visibility,
         disabled=st.session_state.disabled,
     )
+    with col2:
+        involvement_options = ["Single", "More than one"]
 
-    involvement_options = ["Single", "More than one"]
-
-    option1 = st.selectbox(
+        option1 = st.selectbox(
         "Type of Involvement",
         options=involvement_options,
         label_visibility=st.session_state.visibility,

@@ -28,11 +28,31 @@ def main(username):
             "Bridge course/remedial/makeup", 
             "Tutorial classes"
         ])
-        year_program = st.text_input("Year & Program")
-        dept_specialization = st.text_input("Dept./Specialisation")
-        period_from = st.date_input("From", value=date.today())
-        period_to = st.date_input("To", value=date.today())
-        hours = st.number_input("Hours", min_value=0, step=1)
+        col1, col2,col3 = st.columns(3)
+        with col1:
+            year=  st.selectbox(
+        "Year",
+        ("1", "2", "3","4"),
+        label_visibility=st.session_state.visibility,
+        disabled=st.session_state.disabled,
+    )
+        with col2:
+            program = st.text_input("Program")
+        with col3:
+            dept = st.selectbox(
+        "Department",
+        ("CSE", "CSM", "CSD","ECE","EEE","IT","MECH","CIVIL"),
+        label_visibility=st.session_state.visibility,
+        disabled=st.session_state.disabled,
+    )
+
+        col1,col2,col3=st.columns(3)
+        with col1:
+            period_from = st.date_input("From", value=date.today())
+        with col2:
+            period_to = st.date_input("To", value=date.today())
+        with col3:
+            hours = st.number_input("Hours", min_value=0, step=1)
         description = st.text_area("Brief description of program")
         submit_button = st.form_submit_button(label="Submit")
 
@@ -46,7 +66,7 @@ def main(username):
                 data = {
                     "username": username,
                     "activity_type": activity_type,
-                    "year_program": year_program,
+                    "year_program": year+" "+program,
                     "dept_specialization": dept_specialization,
                     "period_from": datetime.datetime.combine(period_from, datetime.datetime.min.time()),
                     "period_to": datetime.datetime.combine(period_to, datetime.datetime.min.time()),

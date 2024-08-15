@@ -39,8 +39,11 @@ def main(username):
 
         # Section for patents filed/obtained in present assessment year
         st.subheader("No. Of PATENTS Filed/Obtained in present assessment year")
-        status_of_patent = st.selectbox("Status of Patent", ["", "Filed", "Obtained"])
-        level_of_patent = st.selectbox("Level of Patent", ["", "International", "National", "State", "Local"])
+        col1,col2=st.columns(2)
+        with col1:
+            status_of_patent = st.selectbox("Status of Patent", ["", "Filed", "Obtained"])
+        with col2:
+            level_of_patent = st.selectbox("Level of Patent", ["", "International", "National", "State", "Local"])
         date_of_filing = st.date_input("Date of Filing", value=datetime.datetime.now(), format="YYYY-MM-DD")
         description_of_patent = st.text_area("Description of Patent", value="", placeholder="Enter description of the patent")
 
