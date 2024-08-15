@@ -172,4 +172,4 @@ def main(username, role):
         st.write("")
 
 if __name__ == "__main__":
-    main(st.session_state.username,st.session_state.role)  # Replace with dynamic username, role, and department retrieval logic if available
+    main(st.session_state.username,st.session_state.role)

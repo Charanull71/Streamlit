@@ -189,22 +189,68 @@ def faculty_home():
 
 def admin_home():
     st.title("Welcome Admin")
-
     if st.sidebar.button("Logout"):
         logout()
-
     nav = st.sidebar.radio("Navigation", ["Users", "Suspend User", "Pdf View", "Issues", "POW ADMIN"])
-
     if nav == "Users":
-        adminissue.add_user()
+        add_user_form()
     elif nav == "Suspend User":
-        adminissue.suspend_user()
+        suspend_user_form()
     elif nav == "Pdf View":
         pdf.main()
     elif nav == "Issues":
         adminissue.main()
     elif nav == "POW ADMIN":
-        adminpow.main()
+        adminpow.main(st.session_state.username,st.session_state.role)
+def suspend_user_form():
+    st.header("Suspend User")
+    with st.form("suspend_user_form"):
+        suspend_username = st.text_input("Username to Suspend")
+
+        submit_button = st.form_submit_button("Suspend User")
+
+        if submit_button:
+            if suspend_username:
+                try:
+                    result = db['users'].update_one(
+                        {"username": suspend_username},
+                        {"$set": {"role": "Suspended"}}
+                    )
+                    if result.modified_count > 0:
+                        st.success(f"User {suspend_username} suspended successfully!")
+                    else:
+                        st.error(f"User {suspend_username} not found.")
+                except Exception as e:
+                    st.error(f"Error suspending user: {e}")
+            else:
+                st.warning("Please enter a username.")
+def add_user_form():
+    st.header("Add New User")
+
+    with st.form("add_user_form"):
+        new_username = st.text_input("Username")
+        new_password = st.text_input("Password", type="password")
+        new_role = st.selectbox("Role", ["Faculty", "HOD", "Principal"])
+        new_department = st.text_input("Department")
+
+        submit_button = st.form_submit_button("Add User")
+
+        if submit_button:
+            if new_username and new_password and new_role and new_department:
+                new_user = {
+                    "username": new_username,
+                    "password": new_password,
+                    "role": new_role,
+                    "department": new_department,
+                    "status": "Active"  # Default status
+                }
+                try:
+                    db['users'].insert_one(new_user)
+                    st.success("User added successfully!")
+                except Exception as e:
+                    st.error(f"Error adding user: {e}")
+            else:
+                st.warning("Please fill in all fields.")
 
 @st.cache_data
 def get_faculty_details():
