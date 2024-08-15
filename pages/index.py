@@ -175,11 +175,17 @@ def faculty_home():
     elif nav == "Retrieve":
         facultyretrieve.main(st.session_state.username)
     elif nav == "Notifications":
+<<<<<<< HEAD
         notification.main()
     elif nav == "Graphical Analysis":
         pl.main(st.session_state.username)
     elif nav == "Graphical Analysis - Detailed":
         pc.main(st.session_state.username)
+=======
+        notification.main(st.session_state.username)
+    elif nav == "pdf view":
+        pdf.main()
+>>>>>>> 1357898dbd5e634f5e74d70ad4666a5a67ae9527
     elif nav == "Issues":
         issues.main(st.session_state.username)
 
