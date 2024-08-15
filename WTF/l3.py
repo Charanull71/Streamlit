@@ -2,7 +2,7 @@ import streamlit as st
 from pymongo import MongoClient
 import datetime
 from datetime import date
-
+import pandas as pd
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
@@ -15,7 +15,7 @@ def calculate_training_points(activity_type, hours):
         "Bridge course/remedial/makeup": 50,
         "Tutorial classes": 20
     }
-    return activity_points.get(activity_type, 0) * hours
+    return activity_points.get(activity_type, 0)
 
 def main(username):
     st.title("Student Training Activities")
@@ -80,6 +80,17 @@ def main(username):
                     st.success("Training activity data inserted successfully!")
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
+    st.subheader("Training Activities This Year")
+    start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
+    end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
+    query = {"username": username, "date": {"$gte": start_date, "$lte": end_date}}
+    records = list(collection_l3.find(query))
 
+    if records:
+        df = pd.DataFrame(records)
+        df = df.drop(columns=["_id", "username"])  # Drop columns that are not needed in the table
+        st.table(df)
+    else:
+        st.write("No data found for this year.")
 if __name__ == "__main__":
     main(st.session_state.username)

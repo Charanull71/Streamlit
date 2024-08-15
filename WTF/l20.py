@@ -1,7 +1,7 @@
 import streamlit as st
 import datetime
 from pymongo import MongoClient
-
+import pandas as pd
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
@@ -62,6 +62,18 @@ def main(username):
         except Exception as e:
             st.error(f"An error occurred: {e}")
             return
+    st.subheader("Awards/Fellowships(Current Academic Year)")
+    start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
+    end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
+    query = {"username": username, "date": {"$gte": start_date, "$lte": end_date}}
+    records = list(collection.find(query))
+
+    if records:
+        df = pd.DataFrame(records)
+        df = df.drop(columns=["_id", "username"])  # Drop columns that are not needed in the table
+        st.table(df)
+    else:
+        st.write("No data found for this year.")
 
 if __name__ == "__main__":
     main(st.session_state.username)

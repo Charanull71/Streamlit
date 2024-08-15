@@ -1,26 +1,24 @@
 import streamlit as st
-from pymongo import MongoClient
 import pandas as pd
+from pymongo import MongoClient
 from streamlit_cookies_manager import EncryptedCookieManager
-from WTF import help, issues, adminissue, pl, adminpow, proofret, pc, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD, HODDPOW, sent, r, pdf
-from Home import st 
-# st.set_page_config(
-#     page_title="Employee Appraisal System",
-#     page_icon="📝",
-#     layout="centered"
-# )
+from WTF import help, issues, adminissue,pl,adminpow, proofret,pc,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD,HODDPOW, sent, r, pdf
+# Set page configuration
+st.set_page_config(
+    page_title="Employee Appraisal System",  # Title of the page
+    page_icon="📝",  # Icon to display in the browser tab (can be an emoji or path to an image file)
+    layout="centered"  # Optional: 'wide' for full-width layout, 'centered' for centered layout
+)
 
-
+# Initialize EncryptedCookieManager with required 'password'
 cookies = EncryptedCookieManager(password="a$tr0ngP@ssw0rdTh@tIsS3cur3")
 
-if not cookies.ready:
+# Check if cookies are loaded
+if not cookies.ready():
     st.warning("Cookies are not loaded. Please check your configuration.")
+    st.stop()  # Stop execution until cookies are ready
 
-@st.cache_resource
-def get_db_client():
-    return MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
-
-client = get_db_client()
+client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 
 if "logged_in" not in st.session_state:
@@ -32,9 +30,11 @@ if "username" not in st.session_state:
 if "role" not in st.session_state:
     st.session_state.role = cookies.get("role")
 
+
 if "department" not in st.session_state and st.session_state.username:
     user = db['users'].find_one({"username": st.session_state.username})
     st.session_state.department = user.get("department") if user else ""
+
 
 def login():
     st.title("Login")
@@ -56,6 +56,9 @@ def login():
                 cookies["logged_in"] = "True"
                 cookies["username"] = username
                 cookies["role"] = role
+
+                # Save the cookies and rerun the script
+                cookies.save()
                 st.rerun()
         else:
             st.error("Invalid username, password, or role")
@@ -65,11 +68,14 @@ def logout():
     st.session_state.username = ""
     st.session_state.role = ""
 
+    # Clear cookies by deleting them
     cookies.pop("logged_in", None)
     cookies.pop("username", None)
     cookies.pop("role", None)
-    st.rerun()
 
+    # Save the changes and reload the page to show the login form
+    cookies.save()
+    st.rerun()
 def hod_home():
     st.title(f"Welcome HOD: {st.session_state.username}")
 
@@ -175,17 +181,9 @@ def faculty_home():
     elif nav == "Retrieve":
         facultyretrieve.main(st.session_state.username)
     elif nav == "Notifications":
-<<<<<<< HEAD
-        notification.main()
-    elif nav == "Graphical Analysis":
-        pl.main(st.session_state.username)
-    elif nav == "Graphical Analysis - Detailed":
-        pc.main(st.session_state.username)
-=======
         notification.main(st.session_state.username)
     elif nav == "pdf view":
         pdf.main()
->>>>>>> 1357898dbd5e634f5e74d70ad4666a5a67ae9527
     elif nav == "Issues":
         issues.main(st.session_state.username)
 

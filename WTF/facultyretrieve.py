@@ -160,7 +160,7 @@ def calculate_training_points(activity_type, hours):
         "Bridge course/remedial/makeup": 50,
         "Tutorial classes": 20
     }
-    return activity_points.get(activity_type, 0) * hours
+    return activity_points.get(activity_type, 0)
 def get_points_l5(certificate_type, relevance):
     """
     Function to get the points based on the type of certificate and relevance to the field of specialization.

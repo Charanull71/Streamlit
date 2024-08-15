@@ -1,7 +1,7 @@
 import streamlit as st
 import datetime
 from pymongo import MongoClient
-
+import pandas as pd
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
@@ -73,7 +73,17 @@ def main(username):
                     }
                     collection_l2_btech.insert_one(data)
                     st.success("B.Tech project data inserted successfully!")
-
+        st.subheader("Student Project Works Undertaken This Year(B.Tech)")
+        start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
+        end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
+        query = {"username": username, "date": {"$gte": start_date, "$lte": end_date}}
+        records = list(collection_l2_btech.find(query))
+        if records:
+            df = pd.DataFrame(records)
+            df = df.drop(columns=["_id", "username"])  # Drop columns that are not needed in the table
+            st.table(df)
+        else:
+            st.write("No data found for this year.")
     elif st.session_state.project_type == "M.Tech/MBA":
         st.header("M.Tech/MBA Projects")
         with st.form(key='mtech_form'):
@@ -102,7 +112,18 @@ def main(username):
                     }
                     collection_l2_mtech.insert_one(data)
                     st.success("M.Tech/MBA project data inserted successfully!")
+        st.subheader("Student Project Works Undertaken This Year(M.Tech)")
+        start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
+        end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
+        query = {"username": username, "date": {"$gte": start_date, "$lte": end_date}}
+        records = list(collection_l2_mtech.find(query))
 
+        if records:
+            df = pd.DataFrame(records)
+            df = df.drop(columns=["_id", "username"])  # Drop columns that are not needed in the table
+            st.table(df)
+        else:
+            st.write("No data found for this year.")
 if __name__ == "__main__":
     if 'username' in st.session_state:
         main(st.session_state.username)
