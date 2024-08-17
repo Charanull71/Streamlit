@@ -3,6 +3,7 @@ import datetime
 from pymongo import MongoClient
 import base64
 import pandas as pd
+
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
@@ -20,7 +21,7 @@ points_dict = {
     "BoS Incharge": 50,
     "Library Incharge": 50,
     "Project Co-Ordinator": 50,
-    "Committee Membership": 10
+    "Committee Membership": 5  # Updated to 5 points for each membership
 }
 
 def main(username):
@@ -69,44 +70,23 @@ def main(username):
 
         # Incharges & Committee Coordinators
         st.write("**Department level Incharges & College level Committee Coordinators**")
-        incharges = []
-        incharge_roles = ["BoS Incharge", "Library Incharge", "Project Co-Ordinator"]
+        incharges_text = st.text_input("Enter roles as a comma-separated list Ex: BoS Incharge| Library Incharge| Project Co-Ordinator", key="incharges_text")
+        incharges_points = 0
+        if incharges_text:
+            incharge_roles = [role.strip() for role in incharges_text.split(",")]
+            incharges_points = len(incharge_roles) * 5
+            st.write(f"**Roles Entered:** {', '.join(incharge_roles)}")
+            st.write(f"**Points for Roles:** {incharges_points}")
         
-        for incharge in incharge_roles:
-            incharge_role = st.selectbox(f"Select Incharge Role ({incharge})", ["None", incharge], key=f"incharge_role_{incharge}")
-            
-            if incharge_role != "None":
-                incharge_since = st.date_input(f"SINCE DATE ({incharge})", today, format="MM/DD/YYYY", key=f"incharge_since_{incharge}")
-                incharge_till = st.date_input(f"TILL DATE ({incharge})", today, format="MM/DD/YYYY", key=f"incharge_till_{incharge}")
-                st.write(f"**Role:** {incharge}")
-                st.write(f"**Since Date:** {incharge_since.strftime('%Y-%m-%d')}")
-                st.write(f"**Till Date:** {incharge_till.strftime('%Y-%m-%d')}")
-                st.write(f"**Points:** {points_dict[incharge]}")
-                incharges.append({
-                    "role": incharge,
-                    "since_date": incharge_since.strftime("%Y-%m"),
-                    "till_date": incharge_till.strftime("%Y-%m"),
-                    "points": points_dict[incharge]
-                })
-
         # Committee Memberships
         st.write("**CURRENTLY engaged Committee Memberships**")
-        membership_role = st.selectbox("Select Committee Membership", ["None", "Committee Membership"], key="membership_role")
-        memberships = []
-        if membership_role != "None":
-            membership_nature_of_work = st.text_input("Nature of work", key="membership_nature_of_work")
-            membership_since = st.date_input("SINCE DATE", today, format="MM/DD/YYYY", key="membership_since")
-            membership_till = st.date_input("TILL DATE", today, format="MM/DD/YYYY", key="membership_till")
-            st.write(f"**Nature of Work:** {membership_nature_of_work}")
-            st.write(f"**Since Date:** {membership_since.strftime('%Y-%m-%d')}")
-            st.write(f"**Till Date:** {membership_till.strftime('%Y-%m-%d')}")
-            st.write(f"**Points:** {points_dict[membership_role]}")
-            memberships.append({
-                "nature_of_work": membership_nature_of_work,
-                "since_date": membership_since.strftime("%Y-%m"),
-                "till_date": membership_till.strftime("%Y-%m"),
-                "points": points_dict[membership_role]
-            })
+        memberships_text = st.text_input("Enter memberships as a comma-separated list", key="memberships_text")
+        memberships_points = 0
+        if memberships_text:
+            membership_roles = [role.strip() for role in memberships_text.split(",")]
+            memberships_points = len(membership_roles) * 5
+            st.write(f"**Memberships Entered:** {', '.join(membership_roles)}")
+            st.write(f"**Points for Memberships:** {memberships_points}")
 
         # File uploader for certificates
         certificate_file = st.file_uploader("Upload your all role certificate PDF", type=["pdf"])
@@ -114,7 +94,7 @@ def main(username):
         if st.form_submit_button("Submit"):
             # Check for empty fields
             if (college_role == "None" and department_role == "None" and
-                not incharges and not memberships):
+                not incharges_text and not memberships_text):
                 st.error("Please fill out at least one required field.")
                 return
 
@@ -143,16 +123,15 @@ def main(username):
                     total_points += points_dict[college_role]
                 if department_role != "None":
                     total_points += points_dict[department_role]
-                total_points += sum(incharge['points'] for incharge in incharges)
-                total_points += sum(membership['points'] for membership in memberships)
+                total_points += incharges_points + memberships_points
                 total_points = min(total_points, 100)  # Ensure the total points do not exceed the maximum
 
                 data = {
                     "username": username,
                     "college_role": college_role,
                     "department": department_role,
-                    "incharges": incharges,
-                    "memberships": memberships,
+                    "incharges": incharge_roles if incharges_text else [],
+                    "memberships": membership_roles if memberships_text else [],
                     "department": department,
                     "certificate_file": encoded_certificate,
                     "total_points": total_points,
@@ -164,7 +143,8 @@ def main(username):
                 st.success("Data inserted successfully!")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-        st.subheader("Professional Roles(Current Academic Year)")
+
+        st.subheader("Professional Roles (Current Academic Year)")
         start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
         end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
         query = {"username": username, "date": {"$gte": start_date, "$lte": end_date}}
@@ -172,9 +152,10 @@ def main(username):
 
         if records:
             df = pd.DataFrame(records)
-            df = df.drop(columns=["_id", "username","certificate_file"])  # Drop columns that are not needed in the table
+            df = df.drop(columns=["_id", "username", "certificate_file"])  # Drop columns that are not needed in the table
             st.table(df)
         else:
             st.write("No data found for this year.")
+
 if __name__ == "__main__":
     main(st.session_state.username)
