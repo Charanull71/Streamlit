@@ -3,6 +3,7 @@ from pymongo import MongoClient
 import datetime
 import base64
 import pandas as pd
+from l1 import pascal_case
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
@@ -82,16 +83,16 @@ def main(username):
 
                 data = {
                     "username": username,
-                    "lectures": lec,
-                    "delivering_talks": dtalk,
-                    "chairing_talks": ctalks,
+                    "lectures": pascal_case(lec),
+                    "delivering_talks": pascal_case(dtalk),
+                    "chairing_talks": pascal_case(ctalks),
                     "geographical_level": Subject,
-                    "inside_or_out_campus": Subject3,
-                    "platform_name": Subject1,
-                    "delivery_type": Subject4,
-                    "host_institution_details": Subject11,
-                    "audience_details": Subject13,
-                    "guest_lecture_delivery_type": Subject21,
+                    "inside_or_out_campus": pascal_case(Subject3),
+                    "platform_name": pascal_case(Subject1),
+                    "delivery_type": pascal_case(Subject4),
+                    "host_institution_details": pascal_case(Subject11),
+                    "audience_details": pascal_case(Subject13),
+                    "guest_lecture_delivery_type": pascal_case(Subject21),
                     "certificate_pdf": encoded_pdf,
                     "department": department,
                     "points": points,

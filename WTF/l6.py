@@ -3,6 +3,7 @@ import datetime
 from pymongo import MongoClient
 import base64
 import pandas as pd
+from l1 import pascal_case
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
@@ -115,10 +116,10 @@ def main(username):
 
                 data = {
                     "username": username,
-                    "fdp_name": Subject,
+                    "fdp_name": pascal_case(Subject),
                     "institute_level": level_of_institute,
-                    "event_title": title,
-                    "host_institution": ht,
+                    "event_title": pascal_case(title),
+                    "host_institution": pascal_case(ht),
                     "start_date": frod.strftime("%Y-%m-%d"),
                     "end_date": tod.strftime("%Y-%m-%d"),
                     "no_of_days": days,

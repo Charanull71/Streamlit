@@ -2,6 +2,7 @@ import streamlit as st
 from pymongo import MongoClient
 import datetime
 import pandas as pd
+from l1 import pascal_case
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
@@ -72,8 +73,8 @@ def main(username):
                 data = {
                     "username": username,
                     "students_completed": n1,
-                    "degree": deg,
-                    "university": uni,
+                    "degree": pascal_case(deg),
+                    "university": pascal_case(uni),
                     "guide": gui,
                     "date_of_registration": frod3,
                     "student_particulars": stype,

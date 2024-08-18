@@ -3,6 +3,7 @@ import time
 from pymongo import MongoClient
 import datetime
 import pandas as pd
+from l1 import pascal_case
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
@@ -47,17 +48,19 @@ def main(username):
     )
     col1,col2=st.columns(2)
     with col1:
-        year = st.text_input(
-        "Year",
-        value="",
-        placeholder="Enter the Year"
-    )
+        year = st.selectbox(
+            "Year",
+            ("1", "2", "3", "4"),
+            label_visibility=st.session_state.visibility,
+            disabled=st.session_state.disabled,
+        )
     with col2:
-        dep = st.text_input(
-        "Department",
-        value="",
-        placeholder="Department Name"
-    )
+        dep = st.selectbox(
+            "Department",
+            ("CSE", "CSM", "CSD", "ECE", "EEE", "IT", "MECH", "CIVIL"),
+            label_visibility=st.session_state.visibility,
+            disabled=st.session_state.disabled,
+        )
     col1,col2=st.columns(2)
     
     material_options = [
@@ -95,7 +98,7 @@ def main(username):
         try:
             data = {
                 "username": username,
-                "subject": Subject,
+                "subject": pascal_case(Subject),
                 "year": year,
                 "department": dep,
                 "type_of_involvement": option1,

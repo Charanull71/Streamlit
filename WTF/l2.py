@@ -2,6 +2,7 @@ import streamlit as st
 import datetime
 from pymongo import MongoClient
 import pandas as pd
+from l1 import pascal_case
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
@@ -64,7 +65,7 @@ def main(username):
                     data = {
                         "username": username,
                         "project_type": "B.Tech",
-                        "reg_no": btech_reg_no,
+                        "reg_no": pascal_case(btech_reg_no),
                         "submitted": btech_submitted,
                         "grade": btech_grade,
                         "published": btech_published,
@@ -104,7 +105,7 @@ def main(username):
                         "project_type": "M.Tech/MBA",
                         "reg_no": mtech_reg_no,
                         "program": mtech_program,
-                        "specialization": mtech_specialization,
+                        "specialization": pascal_case(mtech_specialization),
                         "grade": mtech_grade,
                         "publication": mtech_publication,
                         "points": mtech_points,

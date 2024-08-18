@@ -2,11 +2,12 @@ import streamlit as st
 import pandas as pd
 from pymongo import MongoClient
 import datetime
+
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 collection = db['l1']
-
+collection_users = db['users']
 def calpoints(option1, option2, res):
     # Logic to calculate points based on feedback and result percentage
     if option1 == "Excellent" and option2 == "Excellent":
@@ -91,77 +92,66 @@ def calpoints(option1, option2, res):
         else:
             return 50
 
+def pascal_case(text):
+    # Convert the input text to Pascal Case
+    return ' '.join(word.capitalize() for word in text.split())
+
 def main(username):
     if "visibility" not in st.session_state:
         st.session_state.visibility = "visible"
         st.session_state.disabled = True
 
-    # Display warning message for 20 seconds
-    # warning_message = "Before submitting, please cross check all of your information is correct and no errors, changes cannot be recognized faster!! We appreciate your careful behavior in your self-appraisal."
-    # with st.spinner("Read Warning Message.... "):
-    #     st.warning(warning_message, icon="⚠️")
-    #     time.sleep(20)  # Wait for 20 seconds
-
-    # Reset session state after 20 seconds
+    # Reset session state
     st.session_state.visibility = "visible"
     st.session_state.disabled = False
 
     st.title("Theory Courses Handled")
     Subject = st.text_input("Subject", value="", placeholder="Enter Your Subject", disabled=st.session_state.disabled)
-    # section = st.text_input("Class & Section", value="", placeholder="Enter Classname & Section || Example: 3 CSE B", disabled=st.session_state.disabled)
     
-    col1,col2,col3= st.columns(3)
+    col1, col2, col3 = st.columns(3)
     with col1:
         year = st.selectbox(
-        "Year",
-        ("1", "2", "3","4"),
-        label_visibility=st.session_state.visibility,
-        disabled=st.session_state.disabled,
-    )
-        
-        # st.text_input("Year", value="", placeholder="Year Name", disabled=st.session_state.disabled)
+            "Year",
+            ("1", "2", "3", "4"),
+            label_visibility=st.session_state.visibility,
+            disabled=st.session_state.disabled,
+        )
     with col2:
-        dep =st.selectbox(
-        "Department",
-        ("CSE", "CSM", "CSD","ECE","EEE","IT","MECH","CIVIL"),
-        label_visibility=st.session_state.visibility,
-        disabled=st.session_state.disabled,
-    ) 
-
-        # st.text_input("Department", value="", placeholder="Department Name", disabled=st.session_state.disabled)
+        dep = st.selectbox(
+            "Department",
+            ("CSE", "CSM", "CSD", "ECE", "EEE", "IT", "MECH", "CIVIL"),
+            label_visibility=st.session_state.visibility,
+            disabled=st.session_state.disabled,
+        )
     with col3:
         section = st.selectbox(
-        "Section",
-        ("A", "B", "C","D","E","F",),
-        label_visibility=st.session_state.visibility,
-        disabled=st.session_state.disabled,
-    ) 
-        # st.text_input("Section", value="", placeholder="Enter Classname & Section || Example: 3 CSE B", disabled=st.session_state.disabled)
-    col2, col3 = st.columns(2)
-    with col2:
-        cp = st.text_input("Classes Planned", value="", placeholder="No. Of Classes Planned", disabled=st.session_state.disabled)
-    with col3:
-        ch = st.text_input("Classes Held", value="", placeholder="No. Of Classes Held", disabled=st.session_state.disabled)
-
-    
-    # section = st.text_input("Class & Section", value="", placeholder="Enter Classname & Section || Example: 3 CSE B", disabled=st.session_state.disabled)
-    # cp = st.text_input("Classes Planned", value="", placeholder="No. Of Classes Planned", disabled=st.session_state.disabled)
-    # ch = st.text_input("Classes Held", value="", placeholder="No. Of Classes Held", disabled=st.session_state.disabled)
+            "Section",
+            ("A", "B", "C", "D", "E", "F"),
+            label_visibility=st.session_state.visibility,
+            disabled=st.session_state.disabled,
+        )
+        
     col4, col5 = st.columns(2)
     with col4:
-        option1 = st.selectbox(
-        "Student Feedback (Cycle 1)",
-        ("Excellent", "Good", "Satisfactory"),
-        label_visibility=st.session_state.visibility,
-        disabled=st.session_state.disabled,
-    )
+        cp = st.text_input("Classes Planned", value="", placeholder="No. Of Classes Planned", disabled=st.session_state.disabled)
     with col5:
+        ch = st.text_input("Classes Held", value="", placeholder="No. Of Classes Held", disabled=st.session_state.disabled)
+
+    col6, col7 = st.columns(2)
+    with col6:
+        option1 = st.selectbox(
+            "Student Feedback (Cycle 1)",
+            ("Excellent", "Good", "Satisfactory"),
+            label_visibility=st.session_state.visibility,
+            disabled=st.session_state.disabled,
+        )
+    with col7:
         option2 = st.selectbox(
-        "Student Feedback (Cycle 2)",
-        ("Excellent", "Good", "Satisfactory"),
-        label_visibility=st.session_state.visibility,
-        disabled=st.session_state.disabled,
-    )
+            "Student Feedback (Cycle 2)",
+            ("Excellent", "Good", "Satisfactory"),
+            label_visibility=st.session_state.visibility,
+            disabled=st.session_state.disabled,
+        )
     res = st.text_input("Result Of Students", value="", placeholder="% Of Students Passed", disabled=st.session_state.disabled)
 
     if st.button("Submit", disabled=st.session_state.disabled):
@@ -174,21 +164,22 @@ def main(username):
             points = calpoints(option1, option2, res)
             data = {
                 "username": username,
-                "subject": Subject,
+                "subject": pascal_case(Subject),
                 "department": dep,
-                "section": year+" "+dep+" "+section,
+                "section": year + " " + dep + " " + section,
                 "classes_planned": cp,
                 "classes_held": ch,
                 "feedback1": option1,
                 "feedback2": option2,
                 "result": res,
                 "points": points,
-                "date":datetime.datetime.now()
+                "date": datetime.datetime.now()
             }
             collection.insert_one(data)
             st.success("Data inserted successfully!")
         except Exception as e:
             st.error(f"An error occurred: {e}")
+    
     st.subheader("Courses Handled This Year")
     start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
     end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
@@ -201,8 +192,6 @@ def main(username):
         st.table(df)
     else:
         st.write("No data found for this year.")
-
-
 
 if __name__ == "__main__":
     main(st.session_state.username)

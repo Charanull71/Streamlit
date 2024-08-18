@@ -51,7 +51,7 @@ def main(username):
             data = {
                 "username":st.session_state.username,
                 "department":department,
-                "award_name": award_name,
+                "award_name": pascal_case(award_name),
                 "award_type": award_type,
                 "points": points,
                 "date": datetime.datetime.now()

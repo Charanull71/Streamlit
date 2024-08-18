@@ -3,6 +3,7 @@ import datetime
 from pymongo import MongoClient
 import base64
 import pandas as pd
+from l1 import pascal_case
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
@@ -63,7 +64,7 @@ def main(username):
 
                 data = {
                     "username": username,
-                    "professional_body": professional_body,
+                    "professional_body": pascal_case(professional_body),
                     "since_date": since_date.strftime("%Y-%m-%d"),
                     "membership_type": membership_type,
                     "points": points,

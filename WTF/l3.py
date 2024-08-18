@@ -3,11 +3,12 @@ from pymongo import MongoClient
 import datetime
 from datetime import date
 import pandas as pd
+from l1 import pascal_case
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 collection_l3 = db['l3']
-
+collection_users = db['users']
 def calculate_training_points(activity_type, hours):
     activity_points = {
         "Modular Program/Technical training [coordinator]": 100,
@@ -57,17 +58,22 @@ def main(username):
         submit_button = st.form_submit_button(label="Submit")
 
         if submit_button:
-            if not (activity_type and year_program and dept_specialization and hours and description):
+            if not (activity_type and year and program and dept and hours and description):
                 st.error("Please fill out all fields.")
             else:
                 training_points = calculate_training_points(activity_type, hours)
-                st.write(f"Training Activity Points: {training_points}")
+                user_data = collection_users.find_one({"username": username})
+                if user_data:
+                    department = user_data.get("department", "")
+                else:
+                    st.error("Username not found in users collection.")
+                    return
 
                 data = {
                     "username": username,
                     "activity_type": activity_type,
-                    "year_program": year+" "+program,
-                    "dept_specialization": dept_specialization,
+                    "year_program": year+" "+pascal_case(program),
+                    "dept_specialization": dept,
                     "period_from": datetime.datetime.combine(period_from, datetime.datetime.min.time()),
                     "period_to": datetime.datetime.combine(period_to, datetime.datetime.min.time()),
                     "hours": hours,

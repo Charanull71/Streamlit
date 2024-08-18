@@ -3,6 +3,7 @@ from pymongo import MongoClient
 import datetime
 import base64
 import pandas as pd
+from l1 import pascal_case
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
@@ -75,7 +76,7 @@ def main(username):
 
                 data = {
                     "username": username,
-                    "number_of_authors": ath,
+                    "number_of_authors": pascal_case(ath),
                     "position_of_authorship": pat,
                     "publication_details": pubd,
                     "journal_type": Jtype,
