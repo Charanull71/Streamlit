@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from pymongo import MongoClient
 from streamlit_cookies_manager import EncryptedCookieManager
-from WTF import help, issues, adminissue,pl,adminpow, proofret,pc,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD,HODDPOW, sent, r, pdf
+from WTF import help, issues, adminissue,pl,adminpow, proofret,pc,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD,HODDPOW, sent, r, pdf,pdetails
 # Set page configuration
 st.set_page_config(
     page_title="Employee Appraisal System",  # Title of the page
@@ -82,7 +82,7 @@ def hod_home():
     if st.sidebar.button("Logout"):
         logout()
 
-    nav = st.sidebar.radio("Navigation", ["Faculty Details", "Received", "Sent", "Retrieved Data", "Pdf View", "Departmental Retrieve", "Departmental POW Retrieve", "Graph"])
+    nav = st.sidebar.radio("Navigation", ["Faculty Details", "Received", "Sent", "Retrieved Data", "Pdf View", "Departmental Retrieve", "Departmental POW Retrieve", "Graph","Personal Details"])
 
     if nav == "Faculty Details":
         show_faculty_details()
@@ -186,7 +186,8 @@ def faculty_home():
         pdf.main()
     elif nav == "Issues":
         issues.main(st.session_state.username)
-
+    elif nav == "Personal Details":
+        pdetails.main()
 def admin_home():
     st.title("Welcome Admin")
     if st.sidebar.button("Logout"):

@@ -1,7 +1,7 @@
 import streamlit as st
 import datetime
 from pymongo import MongoClient
-from l1 import pascal_case
+from .l1 import pascal_case
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']

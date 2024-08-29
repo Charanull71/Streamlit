@@ -3,7 +3,7 @@ import datetime
 from pymongo import MongoClient
 import base64
 import pandas as pd
-
+from .l1 import pascal_case
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
