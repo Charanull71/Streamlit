@@ -60,7 +60,7 @@ def login():
             st.session_state.username = username
             st.session_state.password = password
             st.session_state.role = role
-            st.experimental_rerun()
+            st.rerun()
         else:
             user = db['users'].find_one({"username": username, "password": password, "role": role, "organisation": organisation})
             if user:
@@ -69,7 +69,7 @@ def login():
                 st.session_state.password = password
                 st.session_state.role = role
                 st.session_state.organisation = organisation
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Invalid username, password, role, or organisation.")
 
@@ -150,7 +150,7 @@ def manage_organisations():
         if st.button(f"Remove {org['org_name']}"):
             db['organisations'].delete_one({"org_name": org['org_name']})
             st.success(f"Organisation '{org['org_name']}' removed.")
-            st.experimental_rerun()
+            st.rerun()
 
 # Managing admins
 def manage_admins():
@@ -165,7 +165,7 @@ def manage_admins():
         if st.button(f"Remove Admin {admin['username']}"):
             db['users'].delete_one({"username": admin['username']})
             st.success(f"Admin '{admin['username']}' removed.")
-            st.experimental_rerun()
+            st.rerun()
 
 # Admin, HOD, Faculty, Principal home pages
 def admin_home():
@@ -288,7 +288,7 @@ def faculty_home():
     st.title(f"Welcome Faculty: {st.session_state.username}")
     if st.sidebar.button("Logout"):
         logout()
-    available_pages = ["Help","THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED","PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY","FUNDED PROJECTS","FELLOWSHIP/AWARD","OTHER INFORMATION","NUMBER OF LEAVES AVAILED", "Retrieve", "Notifications","Issues"]
+    available_pages = ["Help", "THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED", "PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY", "FUNDED PROJECTS", "FELLOWSHIP/AWARD", "OTHER INFORMATION", "NUMBER OF LEAVES AVAILED", "POW Retrieve", "Retrieve", "Notifications","PDF View", "Graphical Analysis", "Graphical Analysis - Detailed", "Issues"]
     nav = st.sidebar.radio("Navigation", available_pages)
     if nav == "Help":
         help.main()
@@ -378,7 +378,7 @@ def logout():
     st.session_state.logged_in = False
     st.session_state.username = ""
     st.session_state.role = ""
-    st.experimental_rerun()
+    st.rerun()
 
 # Main logic
 if not st.session_state.logged_in:
