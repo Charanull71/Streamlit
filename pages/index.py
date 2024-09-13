@@ -1,81 +1,261 @@
 import streamlit as st
-import pandas as pd
 from pymongo import MongoClient
-from streamlit_cookies_manager import EncryptedCookieManager
+import pandas as pd
+import importlib
+# import toml
 from WTF import help, issues, adminissue,pl,adminpow, proofret,pc,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD,HODDPOW, sent, r, pdf,pdetails
-# Set page configuration
-st.set_page_config(
-    page_title="Employee Appraisal System",  # Title of the page
-    page_icon="📝",  # Icon to display in the browser tab (can be an emoji or path to an image file)
-    layout="centered"  # Optional: 'wide' for full-width layout, 'centered' for centered layout
-)
-
-# Initialize EncryptedCookieManager with required 'password'
-cookies = EncryptedCookieManager(password="a$tr0ngP@ssw0rdTh@tIsS3cur3")
-
-# Check if cookies are loaded
-if not cookies.ready():
-    st.warning("Cookies are not loaded. Please check your configuration.")
-    st.stop()  # Stop execution until cookies are ready
+# Hide the Streamlit hamburger menu and footer
+st.markdown("""
+    <style>
+            #MainMenu{visibility: hidden;}
+        .st-emotion-cache-1wbqy5l e3g6aar2{
+            display: none !important;
+            visibility: hidden;
+        }
+        .st-emotion-cache-1huvf7z ef3psqc5{
+            display: none !important;
+            visibility: hidden;
+        }
+        .st-emotion-cache-1huvf7z ef3psqc6{
+            display: none important;
+            visibility: hidden;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 
+# Session state for managing login
 if "logged_in" not in st.session_state:
-    st.session_state.logged_in = cookies.get("logged_in") == "True"
-
-if "username" not in st.session_state:
-    st.session_state.username = cookies.get("username")
+    st.session_state.logged_in = False
 
 if "role" not in st.session_state:
-    st.session_state.role = cookies.get("role")
+    st.session_state.role = ""
 
+if "username" not in st.session_state:
+    st.session_state.username = ""
 
-if "department" not in st.session_state and st.session_state.username:
-    user = db['users'].find_one({"username": st.session_state.username})
-    st.session_state.department = user.get("department") if user else ""
-
-
+# Login logic
 def login():
     st.title("Login")
+
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
-    role = st.selectbox("Role", ["HOD", "Faculty", "Principal", "Admin"])
+    role = st.selectbox("Role", ["Super Admin", "Admin", "HOD", "Faculty", "Principal"])
+
+    organisation = ""
+    if role in ["Admin", "HOD", "Faculty", "Principal"]:
+        # Retrieve the list of organisations from the database for the dropdown
+        organisations = [org['org_name'] for org in db['organisations'].find()]
+        
+        if organisations:
+            organisation = st.selectbox("Organisation", organisations)
+        else:
+            st.error("No organisations found in the database. Please contact the Super Admin.")
 
     if st.button("Login"):
-        user = db['users'].find_one({"username": username, "password": password, "role": role})
-        if user:
-            if user.get('role') == "Suspended":
-                st.error("You are no longer part of the organization.")
-            else:
+        if username == "superadmin" and password == "123456" and role == "Super Admin":
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.session_state.password = password
+            st.session_state.role = role
+            st.experimental_rerun()
+        else:
+            user = db['users'].find_one({"username": username, "password": password, "role": role, "organisation": organisation})
+            if user:
                 st.session_state.logged_in = True
                 st.session_state.username = username
                 st.session_state.password = password
                 st.session_state.role = role
+                st.session_state.organisation = organisation
+                st.experimental_rerun()
+            else:
+                st.error("Invalid username, password, role, or organisation.")
 
-                cookies["logged_in"] = "True"
-                cookies["username"] = username
-                cookies["role"] = role
+# Super Admin Home Page
+def super_admin_home():
+    st.title(f"Welcome Super Admin: {st.session_state.username}")
 
-                # Save the cookies and rerun the script
-                cookies.save()
-                st.rerun()
+    if st.sidebar.button("Logout"):
+        logout()
+
+    nav = st.sidebar.radio("Super Admin Menu", ["Add Organisation", "Add Admin", "Manage Organisations", "Manage Admins"])
+
+    if nav == "Add Organisation":
+        add_organisation()
+    elif nav == "Add Admin":
+        add_admin()
+    elif nav == "Manage Organisations":
+        manage_organisations()
+    elif nav == "Manage Admins":
+        manage_admins()
+
+# Adding a new organisation
+def add_organisation():
+    st.header("Add New Organisation")
+    
+    org_name = st.text_input("Organisation Name")
+    director_number = st.text_input("Director Contact Number")
+    principal_number = st.text_input("Principal Contact Number")
+    employee_count = st.number_input("Number of Employees", min_value=1)
+
+    if st.button("Add Organisation"):
+        if org_name and director_number and principal_number and employee_count > 0:
+            org_data = {
+                "org_name": org_name,
+                "director_number": director_number,
+                "principal_number": principal_number,
+                "employee_count": employee_count
+            }
+            db['organisations'].insert_one(org_data)
+            st.success(f"Organisation '{org_name}' added successfully!")
         else:
-            st.error("Invalid username, password, or role")
+            st.warning("Please fill in all fields.")
 
-def logout():
-    st.session_state.logged_in = False
-    st.session_state.username = ""
-    st.session_state.role = ""
+# Adding a new admin for an organisation
+def add_admin():
+    st.header("Add New Admin")
 
-    # Clear cookies by deleting them
-    cookies.pop("logged_in", None)
-    cookies.pop("username", None)
-    cookies.pop("role", None)
+    organisations = [org['org_name'] for org in db['organisations'].find()]
+    admin_username = st.text_input("Admin Username")
+    admin_password = st.text_input("Admin Password", type="password")
+    selected_org = st.selectbox("Organisation", organisations)
 
-    # Save the changes and reload the page to show the login form
-    cookies.save()
-    st.rerun()
+    if st.button("Create Admin"):
+        if admin_username and admin_password and selected_org:
+            new_admin = {
+                "username": admin_username,
+                "password": admin_password,
+                "role": "Admin",
+                "organisation": selected_org,
+                "status": "Active"
+            }
+            db['users'].insert_one(new_admin)
+            st.success(f"Admin '{admin_username}' created for organisation '{selected_org}'!")
+        else:
+            st.warning("Please fill in all fields.")
+
+# Managing existing organisations
+def manage_organisations():
+    st.header("Manage Organisations")
+
+    orgs = db['organisations'].find()
+    for org in orgs:
+        st.write(f"*Organisation Name:* {org['org_name']}")
+        st.write(f"Director Contact: {org['director_number']}")
+        st.write(f"Principal Contact: {org['principal_number']}")
+        st.write(f"Employee Count: {org['employee_count']}")
+
+        if st.button(f"Remove {org['org_name']}"):
+            db['organisations'].delete_one({"org_name": org['org_name']})
+            st.success(f"Organisation '{org['org_name']}' removed.")
+            st.experimental_rerun()
+
+# Managing admins
+def manage_admins():
+    st.header("Manage Admins")
+
+    admins = db['users'].find({"role": "Admin"})
+    for admin in admins:
+        st.write(f"*Admin Username:* {admin['username']}")
+        organisation = admin.get('organisation', 'Not Assigned')
+        st.write(f"Organisation: {organisation}")
+
+        if st.button(f"Remove Admin {admin['username']}"):
+            db['users'].delete_one({"username": admin['username']})
+            st.success(f"Admin '{admin['username']}' removed.")
+            st.experimental_rerun()
+
+# Admin, HOD, Faculty, Principal home pages
+def admin_home():
+    st.write(f"Welcome Admin: {st.session_state.username}")
+    st.title(f"Welcome Admin: {st.session_state.username}")
+    if st.sidebar.button("Logout"):
+        logout()
+    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User","Issues"])
+    if nav == "Add User":
+        add_user_form()
+    elif nav == "Suspend User":
+        suspend_user_form()
+    elif nav == "Issues":
+        adminissue.main()
+def add_user_form():
+    st.header("Add New User")
+    
+    # Retrieve the organization of the logged-in admin
+    organisation = db['users'].find_one({"username": st.session_state.username})['organisation']
+
+    with st.form("add_user_form"):
+        new_username = st.text_input("Username")
+        new_password = st.text_input("Password", type="password")
+        new_role = st.selectbox("Role", ["Faculty", "HOD", "Principal"])
+        new_department = st.text_input("Department")
+        
+        # Display the organization name (non-modifiable input)
+        st.text_input("Organisation", value=organisation, disabled=True)
+        
+        submit_button = st.form_submit_button("Add User")
+        
+        if submit_button:
+            if new_username and new_password and new_role and new_department:
+                new_user = {
+                    "username": new_username,
+                    "password": new_password,
+                    "role": new_role,
+                    "department": new_department,
+                    "organisation": organisation,  # Set the organisation from logged-in admin
+                    "status": "Active"  # Default status
+                }
+                try:
+                    db['users'].insert_one(new_user)
+                    st.success("User added successfully!")
+                except Exception as e:
+                    st.error(f"Error adding user: {e}")
+            else:
+                st.warning("Please fill in all fields.")
+
+def suspend_user_form():
+    st.header("Suspend User")
+    with st.form("suspend_user_form"):
+        suspend_username = st.text_input("Username to Suspend")
+        submit_button = st.form_submit_button("Suspend User")
+        if submit_button:
+            if suspend_username:
+                try:
+                    result = db['users'].update_one(
+                        {"username": suspend_username},
+                        {"$set": {"role": "Suspended"}}
+                    )
+                    if result.matched_count > 0:
+                        st.success(f"User '{suspend_username}' has been suspended successfully!")
+                    else:
+                        st.warning(f"User '{suspend_username}' not found.")
+                except Exception as e:
+                    st.error(f"Error suspending user: {e}")
+            else:
+                st.warning("Please enter a username.")
+def show_faculty_details():
+    # Retrieve the department of the logged-in HOD
+    if st.session_state.role == "HOD":
+        hod_department = db['users'].find_one({"username": st.session_state.username})['department']
+        # Filter users based on the HOD's department
+        users = db['users'].find({"department": hod_department})
+        
+        # Define the columns to display
+        columns_to_display = ["username", "role", "department"]
+    else:
+        # For other roles, display all users
+        users = db['users'].find()
+        columns_to_display = ["username", "password", "role", "department"]
+    
+    # Convert the result to a DataFrame
+    df = pd.DataFrame(list(users), columns=["username", "password", "role", "department"])
+    
+    # Display the DataFrame with selected columns
+    st.write(df[columns_to_display])
+
+
 def hod_home():
     st.title(f"Welcome HOD: {st.session_state.username}")
 
@@ -101,35 +281,15 @@ def hod_home():
     elif nav == "Graph":
         pc.main(st.session_state.username)
 
-def principal_home():
-    st.title(f"Welcome Principal: {st.session_state.username}")
-
-    if st.sidebar.button("Logout"):
-        logout()
-
-    nav = st.sidebar.radio("Navigation", ["Faculty Details", "Received", "Pdf View", "Graph", "Sent"])
-
-    if nav == "Faculty Details":
-        show_faculty_details()
-    elif nav == "Received":
-        r.main()
-    elif nav == "Pdf View":
-        pdf.main()
-    elif nav == "Sent":
-        st.write("No sent page")
-    elif nav == "Graph":
-        pc.main(st.session_state.username)
 
 def faculty_home():
+    st.write(f"Welcome Faculty: {st.session_state.username}")
     st.image('img.png')
     st.title(f"Welcome Faculty: {st.session_state.username}")
-
     if st.sidebar.button("Logout"):
         logout()
-
-    available_pages = ["Help", "THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED", "PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY", "FUNDED PROJECTS", "FELLOWSHIP/AWARD", "OTHER INFORMATION", "NUMBER OF LEAVES AVAILED", "POW Retrieve", "Retrieve", "Notifications","PDF View", "Graphical Analysis", "Graphical Analysis - Detailed", "Issues"]
+    available_pages = ["Help","THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED","PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY","FUNDED PROJECTS","FELLOWSHIP/AWARD","OTHER INFORMATION","NUMBER OF LEAVES AVAILED", "Retrieve", "Notifications","Issues"]
     nav = st.sidebar.radio("Navigation", available_pages)
-
     if nav == "Help":
         help.main()
     elif nav == "THEORY COURSES HANDLED":
@@ -186,94 +346,51 @@ def faculty_home():
         pdf.main()
     elif nav == "Issues":
         issues.main(st.session_state.username)
+    elif nav == "Graphical Analysis":
+        pl.main(st.session_state.username)
+    elif nav == "Graphical Analysis - Detailed":
+        pc.main(st.session_state.username)
     elif nav == "Personal Details":
         pdetails.main()
-def admin_home():
-    st.title("Welcome Admin")
+
+def principal_home():
+
+    st.title(f"Welcome Principal: {st.session_state.username}")
+
     if st.sidebar.button("Logout"):
         logout()
-    nav = st.sidebar.radio("Navigation", ["Users", "Suspend User", "Pdf View", "Issues", "POW ADMIN"])
-    if nav == "Users":
-        add_user_form()
-    elif nav == "Suspend User":
-        suspend_user_form()
+
+    nav = st.sidebar.radio("Navigation", ["Faculty Details", "Received", "Pdf View", "Graph", "Sent"])
+
+    if nav == "Faculty Details":
+        show_faculty_details()
+    elif nav == "Received":
+        r.main()
     elif nav == "Pdf View":
         pdf.main()
-    elif nav == "Issues":
-        adminissue.main()
-    elif nav == "POW ADMIN":
-        adminpow.main(st.session_state.username,st.session_state.role)
-def suspend_user_form():
-    st.header("Suspend User")
-    with st.form("suspend_user_form"):
-        suspend_username = st.text_input("Username to Suspend")
+    elif nav == "Sent":
+        st.write("No sent page")
+    elif nav == "Graph":
+        pc.main(st.session_state.username)
 
-        submit_button = st.form_submit_button("Suspend User")
+# Logout function
+def logout():
+    st.session_state.logged_in = False
+    st.session_state.username = ""
+    st.session_state.role = ""
+    st.experimental_rerun()
 
-        if submit_button:
-            if suspend_username:
-                try:
-                    result = db['users'].update_one(
-                        {"username": suspend_username},
-                        {"$set": {"role": "Suspended"}}
-                    )
-                    if result.modified_count > 0:
-                        st.success(f"User {suspend_username} suspended successfully!")
-                    else:
-                        st.error(f"User {suspend_username} not found.")
-                except Exception as e:
-                    st.error(f"Error suspending user: {e}")
-            else:
-                st.warning("Please enter a username.")
-def add_user_form():
-    st.header("Add New User")
-
-    with st.form("add_user_form"):
-        new_username = st.text_input("Username")
-        new_password = st.text_input("Password", type="password")
-        new_role = st.selectbox("Role", ["Faculty", "HOD", "Principal"])
-        new_department = st.text_input("Department")
-
-        submit_button = st.form_submit_button("Add User")
-
-        if submit_button:
-            if new_username and new_password and new_role and new_department:
-                new_user = {
-                    "username": new_username,
-                    "password": new_password,
-                    "role": new_role,
-                    "department": new_department,
-                    "status": "Active"  # Default status
-                }
-                try:
-                    db['users'].insert_one(new_user)
-                    st.success("User added successfully!")
-                except Exception as e:
-                    st.error(f"Error adding user: {e}")
-            else:
-                st.warning("Please fill in all fields.")
-
-@st.cache_data
-def get_faculty_details():
-    faculty_details = db['users'].find({"role": "Faculty"}, {"_id": 0, "password": 0})
-    df = pd.DataFrame(faculty_details)
-    return df
-
-def show_faculty_details():
-    df = get_faculty_details()
-    st.table(df)
-
+# Main logic
 if not st.session_state.logged_in:
     login()
 else:
-    if st.session_state.role == "HOD":
+    if st.session_state.role == "Super Admin":
+        super_admin_home()
+    elif st.session_state.role == "Admin":
+        admin_home()
+    elif st.session_state.role == "HOD":
         hod_home()
     elif st.session_state.role == "Faculty":
         faculty_home()
     elif st.session_state.role == "Principal":
         principal_home()
-    elif st.session_state.role == "Admin":
-        admin_home()
-
-# Make sure to sync cookies
-cookies.save()
