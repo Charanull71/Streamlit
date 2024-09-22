@@ -285,12 +285,12 @@ def hod_home():
 
 
 def faculty_home():
-    st.write(f"Welcome Faculty: {st.session_state.username}")
+    #st.write(f"Welcome Faculty: {st.session_state.username}")
     st.image('img.png')
     st.title(f"Welcome Faculty: {st.session_state.username}")
     if st.sidebar.button("Logout"):
         logout()
-    available_pages = ["Help", "THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED", "PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY", "FUNDED PROJECTS", "FELLOWSHIP/AWARD", "OTHER INFORMATION", "NUMBER OF LEAVES AVAILED", "POW Retrieve", "Retrieve", "Notifications","PDF View", "Graphical Analysis", "Graphical Analysis - Detailed", "Issues"]
+    available_pages = ["Help", "THEORY COURSES HANDLED", "STUDENT PROJECT WORKS UNDERTAKEN", "STUDENT TRAINING", "LEARNING MATERIAL", "CERTIFICATE COURSES DONE", "FDPs ATTENDED", "FDPs ORGANIZED", "PROFESSION ROLES", "STUDENT COUNSELLING / MENTORING", "MEMBERSHIPS WITH PROFESSIONAL BODIES", "CHAIRING SESSIONS AND DELIVERING TALKS & LECTURES", "JOURNAL PUBLICATIONS", "CONFERENCE PUBLICATIONS", "RESEARCH GUIDANCE", "BOOK PUBLICATIONS", "PATENTS", "PRODUCT DESIGN / SOFTWARE DEVELOPMENT", "CONSULTANCY", "FUNDED PROJECTS", "FELLOWSHIP/AWARD", "OTHER INFORMATION", "NUMBER OF LEAVES AVAILED", "POW Retrieve", "Retrieve", "Notifications","PDF View", "Graphical Analysis", "Graphical Analysis - Detailed", "Issues","Personal Details"]
     nav = st.sidebar.radio("Navigation", available_pages)
     if nav == "Help":
         help.main()
@@ -354,6 +354,7 @@ def faculty_home():
         pc.main(st.session_state.username)
     elif nav == "Personal Details":
         pdetails.main()
+    
 
 def principal_home():
 

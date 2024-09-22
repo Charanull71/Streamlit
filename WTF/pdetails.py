@@ -67,10 +67,10 @@ def display_image(image_file):
     else:
         st.text("No image uploaded")
 
-def main(username):
-    if "username" not in st.session_state:
-        st.error("User not logged in.")
-        return
+def main():
+    # if "username" not in st.session_state:
+    #     st.error("User not logged in.")
+    #     return
 
     username = st.session_state.username
 

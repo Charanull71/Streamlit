@@ -10,7 +10,6 @@ def main():
     input_name = st.text_input("Input Field Name (e.g., book_feature)")
     input_type = st.selectbox("Input Type", ["Text", "Dropdown", "Media"])
     
-    # Dropdown options if the input type is dropdown
     dropdown_options = ""
     if input_type == "Dropdown":
         dropdown_options = st.text_area("Options for Dropdown (comma-separated)", placeholder="e.g., Option 1, Option 2")
@@ -20,10 +19,8 @@ def main():
 
     if st.button("Submit"):
         if input_name and input_type and selected_page and selected_role:
-            # Process dropdown options
             options_list = dropdown_options.split(",") if dropdown_options else []
             
-            # Store the new field in the database
             input_data = {
                 "input_name": input_name,
                 "input_type": input_type,
@@ -32,7 +29,7 @@ def main():
                 "role": selected_role,
                 "organisation": st.session_state.organisation
             }
-            db['custom_inputs'].insert_one(input_data)  # Save to custom_inputs collection
+            db['custom_inputs'].insert_one(input_data)
             st.success(f"Input field '{input_name}' added successfully to page '{selected_page}' for role '{selected_role}'.")
         else:
             st.warning("Please fill in all fields.")
