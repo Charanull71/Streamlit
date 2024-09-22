@@ -1,6 +1,7 @@
 import streamlit as st
 from pymongo import MongoClient
 import pandas as pd
+from WTF import advanceButton
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -134,19 +135,23 @@ def plot_hod_data(department, selected_table):
 
 def main(username):
     # Retrieve current logged-in user's role and department
-    role, department = get_user_info(username)
+    col1, col2 = st.columns(2)
+    with col2:
+        advanceButton.main()
+    with col1:
+        role, department = get_user_info(username)
 
     
 
-    if role == "HOD":
-        selected_table = st.selectbox("Select Table", list(collections.keys()))
-        plot_hod_data(department, selected_table)
-    elif role == "Principal":
-        dept_input = st.text_input("Enter Department").strip()
-        if dept_input:
-            plot_hod_data(dept_input, selected_table)
-    else:
-        plot_user_data(username)
+        if role == "HOD":
+            selected_table = st.selectbox("Select Table", list(collections.keys()))
+            plot_hod_data(department, selected_table)
+        elif role == "Principal":
+            dept_input = st.text_input("Enter Department").strip()
+            if dept_input:
+                plot_hod_data(dept_input, selected_table)
+        else:
+            plot_user_data(username)
 
 # if __name__ == "__main__":
 #     # Simulate logged-in user for demonstration; replace with actual session state management

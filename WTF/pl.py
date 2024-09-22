@@ -5,6 +5,7 @@ import datetime
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from WTF import advanceButton
 from plotly.subplots import make_subplots
 
 # MongoDB connection
@@ -269,12 +270,16 @@ def plot_user_data5(username):
     st.plotly_chart(fig)
 
 def main(username):
-    if st.button("Retrieve Data and Plot Graph"):
-        plot_user_data(username)
-        plot_user_data2(username)
-        plot_user_data3(username)
-        plot_user_data4(username)
-        plot_user_data5(username)
+    col1, col2 = st.columns(2)
+    with col2:
+        advanceButton.main()
+    with col1:
+        if st.button("Retrieve Data and Plot Graph"):
+            plot_user_data(username)
+            plot_user_data2(username)
+            plot_user_data3(username)
+            plot_user_data4(username)
+            plot_user_data5(username)
 if __name__ == "__main__":
      # Replace with dynamic username retrieval logic if available
     main(st.session_state.username)
