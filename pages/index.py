@@ -3,7 +3,7 @@ from pymongo import MongoClient
 import pandas as pd
 import importlib
 # import toml
-from WTF import help, issues, adminissue,pl,adminpow, proofret,pc,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD,HODDPOW, sent, r, pdf,pdetails
+from WTF import help, issues, adminissue,pl,adminpow, proofret,pc,l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, retrieve, facultyretrieve, notification, HODD,HODDPOW, sent, r, adman,pdf,pdetails
 # Hide the Streamlit hamburger menu and footer
 st.markdown("""
     <style>
@@ -173,13 +173,15 @@ def admin_home():
     st.title(f"Welcome Admin: {st.session_state.username}")
     if st.sidebar.button("Logout"):
         logout()
-    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User","Issues"])
+    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User","Issues","Admin user"])
     if nav == "Add User":
         add_user_form()
     elif nav == "Suspend User":
         suspend_user_form()
     elif nav == "Issues":
         adminissue.main()
+    elif nav == "Admin user":
+        adman.main()
 def add_user_form():
     st.header("Add New User")
     
