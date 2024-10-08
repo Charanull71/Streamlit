@@ -3,34 +3,41 @@ from pymongo import MongoClient
 import datetime
 import pandas as pd
 from .l1 import pascal_case
+
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
 collection = db['l16']  # Replace 'l16' with your actual collection name
-collection_users = db['users']
+collection_users = db['users']  # Collection for users
+collection_custom = db['custom_inputs']  # Collection for dynamic inputs
 
 # Define points for each patent type
-
-
 def calculate_points(patent_type, patent_category):
     PATENT_POINTS = {
-    "Obtained": {
-        "International": 100,
-        "National": 80,
-        "State": 60,
-        "Local": 40
-    },
-    "Filed": {
-        "International": 80,
-        "National": 60,
-        "State": 40,
-        "Local": 20
+        "Obtained": {
+            "International": 100,
+            "National": 80,
+            "State": 60,
+            "Local": 40
+        },
+        "Filed": {
+            "International": 80,
+            "National": 60,
+            "State": 40,
+            "Local": 20
+        }
     }
-    }
-    return PATENT_POINTS[patent_type].get(patent_category, 0)
+    return PATENT_POINTS.get(patent_type, {}).get(patent_category, 0)
+
+def get_custom_inputs(page):
+    return list(collection_custom.find({"page": page}))
 
 def main(username):
     st.title("PATENTS")
+
+    if "visibility" not in st.session_state:
+        st.session_state.visibility = "visible"
+        st.session_state.disabled = False
 
     with st.form("l16"):
         # Section for patents filed/obtained up to previous assessment year
@@ -40,7 +47,7 @@ def main(username):
 
         # Section for patents filed/obtained in present assessment year
         st.subheader("No. Of PATENTS Filed/Obtained in present assessment year")
-        col1,col2=st.columns(2)
+        col1, col2 = st.columns(2)
         with col1:
             status_of_patent = st.selectbox("Status of Patent", ["", "Filed", "Obtained"])
         with col2:
@@ -48,10 +55,21 @@ def main(username):
         date_of_filing = st.date_input("Date of Filing", value=datetime.datetime.now(), format="YYYY-MM-DD")
         description_of_patent = st.text_area("Description of Patent", value="", placeholder="Enter description of the patent")
 
-        if status_of_patent and level_of_patent:
-            points = calculate_points(status_of_patent, level_of_patent)
-        else:
-            points = 0
+        # Calculate points based on selected options
+        points = calculate_points(status_of_patent, level_of_patent)
+
+        # Fetch and display dynamically added inputs (e.g., media, dropdowns)
+        custom_inputs = get_custom_inputs("l16")
+        additional_data = {}
+
+        for custom_input in custom_inputs:
+            if custom_input['input_type'] == "Text":
+                additional_data[custom_input['input_name']] = st.text_input(custom_input['input_name'])
+            elif custom_input['input_type'] == "Dropdown":
+                additional_data[custom_input['input_name']] = st.selectbox(custom_input['input_name'], custom_input['options'])
+            elif custom_input['input_type'] == "Media":
+                additional_data[custom_input['input_name']] = st.file_uploader(f"Upload {custom_input['input_name']} (Media)", type=["jpg", "jpeg", "png", "pdf"])
+
         if st.form_submit_button("Submit"):
             # Check for empty fields
             if not (n1 and n2 and status_of_patent and level_of_patent and description_of_patent):
@@ -82,10 +100,15 @@ def main(username):
                     "points": points,
                     "date": datetime.datetime.now()
                 }
+
+                # Add custom inputs to the data dictionary
+                data.update(additional_data)
+
                 collection.insert_one(data)
                 st.success("Data inserted successfully!")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+
         st.subheader("Patents Filed/Obtained This Year")
         start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
         end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
@@ -98,5 +121,6 @@ def main(username):
             st.table(df)
         else:
             st.write("No data found for this year.")
+
 if __name__ == "__main__":
     main(st.session_state.username)

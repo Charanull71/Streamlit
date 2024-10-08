@@ -5,16 +5,19 @@ from pymongo import MongoClient
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
-collection = db['l21']
-collection_users = db['users']
-def main(username):
-    # st.set_page_config(page_title="Streamlit Ph.D. Details Form", page_icon="🎓")
+collection = db['l21']  # Replace 'l21' with your actual collection name for Ph.D. details
+collection_users = db['users']  # Replace with your actual collection name for users
+collection_custom = db['custom_inputs']  # Collection for dynamic inputs
 
+def get_custom_inputs(page):
+    return list(collection_custom.find({"page": page}))
+
+def main(username):
     st.title("Ph.D. Details")
     st.subheader("Please fill out the following details:")
 
     phd_holder = st.radio("Are you a Ph.D. holder?", ("YES", "NO"), index=1)
-    
+
     if phd_holder == "NO":
         year_of_registration = st.number_input("Year of registration for pursuing Ph.D.", min_value=1900, max_value=datetime.datetime.now().year, step=1, value=datetime.datetime.now().year)
     else:
@@ -30,21 +33,31 @@ def main(username):
     if course_attainment_completed == "NO":
         reason_course_attainment_not_completed = st.text_area("Reason for not completing Course attainment of all subjects", "")
 
+    # Fetch and display dynamically added inputs (e.g., media, dropdowns)
+    custom_inputs = get_custom_inputs("l21")
+    additional_data = {}
+
+    for custom_input in custom_inputs:
+        if custom_input['input_type'] == "Text":
+            additional_data[custom_input['input_name']] = st.text_input(custom_input['input_name'])
+        elif custom_input['input_type'] == "Dropdown":
+            additional_data[custom_input['input_name']] = st.selectbox(custom_input['input_name'], custom_input['options'])
+        elif custom_input['input_type'] == "Media":
+            additional_data[custom_input['input_name']] = st.file_uploader(f"Upload {custom_input['input_name']} (Media)", type=["jpg", "jpeg", "png", "pdf"])
+
     if st.button("Submit"):
         # Validate and store Ph.D. details in MongoDB
         try:
-            username = st.session_state.username  # Replace with your actual way of getting username
-
-                # Query users collection to get department for the specified username
             user_data = collection_users.find_one({"username": username})
             if user_data:
                 department = user_data.get("department", "")
             else:
                 st.error("Username not found in users collection.")
                 return
+            
             data = {
-                "username":st.session_state.username,
-                "department":department,
+                "username": username,
+                "department": department,
                 "phd_holder": phd_holder,
                 "year_of_registration": year_of_registration,
                 "course_files_submitted": course_files_submitted,
@@ -53,6 +66,9 @@ def main(username):
                 "reason_course_attainment_not_completed": reason_course_attainment_not_completed if course_attainment_completed == "NO" else None,
                 "date": datetime.datetime.now()
             }
+
+            # Add custom inputs to the data dictionary
+            data.update(additional_data)
 
             collection.insert_one(data)
             st.success("Ph.D. details inserted successfully!")

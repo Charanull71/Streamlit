@@ -59,7 +59,7 @@ def main(username):
             collection = db[collection_name]
             
             # Use regex to make the department query case-insensitive
-            query = {"department": {"$regex": hod_department, "$options": "i"}}
+            query = {"department": {"$regex": hod_department.upper(), "$options": "i"}}
             
             # Apply date filter to query
             if start_date and end_date:

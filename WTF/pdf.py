@@ -150,11 +150,14 @@ def display_pdf_as_images(pdf_buffer, resolution=300):
             img = page.to_image(resolution=resolution).original  # Increase resolution
             st.image(img, use_column_width=True)  # Display the image using Streamlit
 
-def main():
+def main(username,role):
     st.title("PDF Viewer and Downloader")
     with st.form("pdf_form"):
         st.write("Enter Username to view or download full details as PDF:")
-        username = st.text_input("Username")
+        if role == "HOD" or role == "Admin" or role=="Principal":    
+            username = st.text_input("Enter username to retrieve PDFs")
+        else:
+            st.text_input("Logged-in Username:", username, disabled=True)
         start_date = st.date_input("Start Date")
         end_date = st.date_input("End Date")
         submit_button = st.form_submit_button("View PDF")

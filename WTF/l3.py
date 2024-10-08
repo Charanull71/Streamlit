@@ -1,14 +1,15 @@
 import streamlit as st
 from pymongo import MongoClient
 import datetime
-from datetime import date
 import pandas as pd
-from .l1 import pascal_case
+
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']
 collection_l3 = db['l3']
 collection_users = db['users']
+collection_custom_inputs = db['custom_inputs']
+
 def calculate_training_points(activity_type, hours):
     activity_points = {
         "Modular Program/Technical training [coordinator]": 100,
@@ -18,10 +19,16 @@ def calculate_training_points(activity_type, hours):
     }
     return activity_points.get(activity_type, 0)
 
+def load_dynamic_inputs(page, role):
+    inputs = list(collection_custom_inputs.find({"page": page, "role": role}))
+    return inputs
+
 def main(username):
     st.title("Student Training Activities")
-
     st.header("Training Activity Details")
+
+    dynamic_fields = load_dynamic_inputs("l3", "Faculty")  # Load fields for page l3 and role Faculty
+    
     with st.form(key='training_form'):
         activity_type = st.selectbox("Type of Activity", [
             "Modular Program/Technical training [coordinator]", 
@@ -29,32 +36,33 @@ def main(username):
             "Bridge course/remedial/makeup", 
             "Tutorial classes"
         ])
-        col1, col2,col3 = st.columns(3)
+        
+        col1, col2, col3 = st.columns(3)
         with col1:
-            year=  st.selectbox(
-        "Year",
-        ("1", "2", "3","4"),
-        label_visibility=st.session_state.visibility,
-        disabled=st.session_state.disabled,
-    )
+            year = st.selectbox("Year", ("1", "2", "3", "4"))
         with col2:
             program = st.text_input("Program")
         with col3:
-            dept = st.selectbox(
-        "Department",
-        ("CSE", "CSM", "CSD","ECE","EEE","IT","MECH","CIVIL"),
-        label_visibility=st.session_state.visibility,
-        disabled=st.session_state.disabled,
-    )
-
-        col1,col2,col3=st.columns(3)
+            dept = st.selectbox("Department", ["CSE", "CSM", "CSD", "ECE", "EEE", "IT", "MECH", "CIVIL"])
+        
+        col1, col2, col3 = st.columns(3)
         with col1:
-            period_from = st.date_input("From", value=date.today())
+            period_from = st.date_input("From", value=datetime.date.today())
         with col2:
-            period_to = st.date_input("To", value=date.today())
+            period_to = st.date_input("To", value=datetime.date.today())
         with col3:
             hours = st.number_input("Hours", min_value=0, step=1)
+        
         description = st.text_area("Brief description of program")
+
+        # Dynamically generated fields based on admin input
+        dynamic_data = {}
+        for field in dynamic_fields:
+            if field['input_type'] == "Text":
+                dynamic_data[field['input_name']] = st.text_input(f"{field['input_name'].replace('_', ' ').title()}")
+            elif field['input_type'] == "Dropdown":
+                dynamic_data[field['input_name']] = st.selectbox(f"{field['input_name'].replace('_', ' ').title()}", field['options'])
+
         submit_button = st.form_submit_button(label="Submit")
 
         if submit_button:
@@ -72,20 +80,23 @@ def main(username):
                 data = {
                     "username": username,
                     "activity_type": activity_type,
-                    "year_program": year+" "+pascal_case(program),
+                    "year_program": year + " " + program,
                     "dept_specialization": dept,
                     "period_from": datetime.datetime.combine(period_from, datetime.datetime.min.time()),
                     "period_to": datetime.datetime.combine(period_to, datetime.datetime.min.time()),
                     "hours": hours,
                     "description": description,
                     "points": training_points,
-                    "date": datetime.datetime.now()
+                    "date": datetime.datetime.now(),
+                    "dynamic_data": dynamic_data  # Store the dynamic fields in MongoDB
                 }
                 try:
                     collection_l3.insert_one(data)
                     st.success("Training activity data inserted successfully!")
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
+    
+    # Display the existing data for the current year
     st.subheader("Training Activities This Year")
     start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
     end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
@@ -98,5 +109,6 @@ def main(username):
         st.table(df)
     else:
         st.write("No data found for this year.")
+
 if __name__ == "__main__":
     main(st.session_state.username)

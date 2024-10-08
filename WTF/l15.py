@@ -2,11 +2,13 @@ import streamlit as st
 from pymongo import MongoClient
 import datetime
 import pandas as pd
+
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
-collection = db['l15']  # Replace 'lll04' with your actual collection name
-collection_users = db['users']
+collection = db['l15']  # Replace 'l15' with your actual collection name for book publications
+collection_users = db['users']  # Replace 'users' with your actual collection name for users
+collection_custom = db['custom_inputs']  # Collection for dynamic inputs
 
 def calculate_book_points(issn_isbn, position_of_authorship, publishing_house_level):
     is_international = "International" in publishing_house_level
@@ -24,7 +26,14 @@ def calculate_book_points(issn_isbn, position_of_authorship, publishing_house_le
         else:
             return 35 if is_first_author else 5
 
+def get_custom_inputs(page):
+    return list(collection_custom.find({"page": page}))
+
 def main(username):
+    if "visibility" not in st.session_state:
+        st.session_state.visibility = "visible"
+        st.session_state.disabled = False
+
     with st.form("l15"):
         st.title("BOOK PUBLICATIONS")
 
@@ -36,6 +45,18 @@ def main(username):
         lph = st.selectbox("Level of Publishing House", ["International Publisher", "National Publisher"])
         tpb = st.text_input("Title and other particulars of the book", value="", placeholder="Enter Title and other particulars of the book")
 
+        # Fetch and display dynamically added inputs (e.g., media, dropdowns)
+        custom_inputs = get_custom_inputs("l15")
+        additional_data = {}
+
+        for custom_input in custom_inputs:
+            if custom_input['input_type'] == "Text":
+                additional_data[custom_input['input_name']] = st.text_input(custom_input['input_name'])
+            elif custom_input['input_type'] == "Dropdown":
+                additional_data[custom_input['input_name']] = st.selectbox(custom_input['input_name'], custom_input['options'])
+            elif custom_input['input_type'] == "Media":
+                additional_data[custom_input['input_name']] = st.file_uploader(f"Upload {custom_input['input_name']} (Media)", type=["jpg", "jpeg", "png", "pdf"])
+
         if st.form_submit_button("Submit"):
             # Check for empty fields
             if not (n1 and aut and pos and iss and lph and tpb):
@@ -43,8 +64,6 @@ def main(username):
                 return
             
             try:
-                username = st.session_state.username  # Replace with your actual way of getting username
-                
                 # Query users collection to get department for the specified username
                 user_data = collection_users.find_one({"username": username})
                 if user_data:
@@ -68,10 +87,15 @@ def main(username):
                     "points": points,
                     "date": datetime.datetime.now()
                 }
+
+                # Add custom inputs to the data dictionary
+                data.update(additional_data)
+
                 collection.insert_one(data)
                 st.success(f"Data inserted successfully! Total Points: {points}")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+
         st.subheader("Book Publications This Year")
         start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
         end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
@@ -84,5 +108,6 @@ def main(username):
             st.table(df)
         else:
             st.write("No data found for this year.")
+
 if __name__ == "__main__":
     main(st.session_state.username)

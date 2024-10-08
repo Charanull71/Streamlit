@@ -3,12 +3,14 @@ from pymongo import MongoClient
 import datetime
 import base64
 import pandas as pd
-from .l1 import pascal_case
+from .l1 import pascal_case  # Make sure this import is correct and relevant
+
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
-collection = db['l11']  # Replace 'll6' with your actual collection name
+collection = db['l11']  # Replace 'l11' with your actual collection name
 collection_users = db['users']  # Replace 'users' with your actual collection name for users
+collection_custom = db['custom_inputs']  # Collection for dynamic inputs
 
 def calculate_points(event_type):
     points_dict = {
@@ -21,12 +23,19 @@ def calculate_points(event_type):
     }
     return points_dict.get(event_type, 0)
 
+def get_custom_inputs(page):
+    return list(collection_custom.find({"page": page}))
+
 def main(username):
+    if "visibility" not in st.session_state:
+        st.session_state.visibility = "visible"
+        st.session_state.disabled = False
+
     with st.form("l11"):
         st.title("Chairing Sessions & Delivering Talks and Lectures")
 
         st.write("No. Of Chairing sessions and delivering talks & lectures up to previous assessment year:")
-        col1,col2,col3=st.columns(3)
+        col1, col2, col3 = st.columns(3)
         with col1:
             lec = st.text_input("Lectures", value="", placeholder="Enter Lectures")
         with col2:
@@ -35,11 +44,12 @@ def main(username):
             ctalks = st.text_input("Chairing Talks", value="", placeholder="Enter Chairing Talks")
 
         st.write("No. Of Chairing sessions and delivering talks & lectures in present assessment year:")
-        Subject = st.selectbox("Geographical Level of platform of delivery", [
+        event_type = st.selectbox("Geographical Level of platform of delivery", [
             "", "Chaired or Co-chaired (International)", "Chaired or Co-chaired (National)", 
             "Delivering talks & Lectures (International)", "Delivering talks & Lectures (National IIT/NIT Level)", 
             "Delivering talks & Lectures (University Level)", "Delivering talks & Lectures (College Level)"
         ])
+        
         Subject3 = st.text_input("Inside or out campus", value="", placeholder="Enter Inside or Out Campus")
         Subject1 = st.text_input("Name of the platform", value="", placeholder="Enter Platform Name")
         Subject4 = st.text_input("Type of delivery", value="", placeholder="Enter Type of Delivery")
@@ -52,11 +62,26 @@ def main(username):
         # File uploader for PDF
         file_uploader = st.file_uploader("Upload your all work in PDF", type=["pdf"])
 
+        # Calculate points based on selected event type
+        points = calculate_points(event_type)
+
+        # Fetch and display dynamically added inputs (if any)
+        custom_inputs = get_custom_inputs("l11")
+        additional_data = {}
+
+        for custom_input in custom_inputs:
+            if custom_input['input_type'] == "Text":
+                additional_data[custom_input['input_name']] = st.text_input(custom_input['input_name'])
+            elif custom_input['input_type'] == "Dropdown":
+                additional_data[custom_input['input_name']] = st.selectbox(custom_input['input_name'], custom_input['options'])
+            elif custom_input['input_type'] == "Media":
+                additional_data[custom_input['input_name']] = st.file_uploader(f"Upload {custom_input['input_name']} (Media)", type=["jpg", "jpeg", "png", "pdf"])
+
         submit_button = st.form_submit_button("Submit")
 
         if submit_button:
             # Check for empty fields
-            if not (lec and dtalk and ctalks and Subject and Subject3 and Subject1 and Subject4 and Subject11 and Subject13 and Subject21):
+            if not (lec and dtalk and ctalks and event_type and Subject3 and Subject1 and Subject4 and Subject11 and Subject13 and Subject21):
                 st.error("Please fill out all required fields.")
                 return
 
@@ -65,8 +90,6 @@ def main(username):
                 return
             
             try:
-                username = st.session_state.username  # Replace with your actual way of getting username
-
                 # Query users collection to get department for the specified username
                 user_data = collection_users.find_one({"username": username})
                 if user_data:
@@ -79,14 +102,12 @@ def main(username):
                 pdf_content = file_uploader.read()
                 encoded_pdf = base64.b64encode(pdf_content).decode('utf-8')
 
-                points = calculate_points(Subject)
-
                 data = {
                     "username": username,
                     "lectures": pascal_case(lec),
                     "delivering_talks": pascal_case(dtalk),
                     "chairing_talks": pascal_case(ctalks),
-                    "geographical_level": Subject,
+                    "geographical_level": event_type,
                     "inside_or_out_campus": pascal_case(Subject3),
                     "platform_name": pascal_case(Subject1),
                     "delivery_type": pascal_case(Subject4),
@@ -98,10 +119,15 @@ def main(username):
                     "points": points,
                     "date": datetime.datetime.now()
                 }
+
+                # Add custom inputs to the data dictionary
+                data.update(additional_data)
+
                 collection.insert_one(data)
                 st.success(f"Data inserted successfully! Total Points: {points}")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+
         st.subheader("Chairing Sessions & Lectures Delivered This Year")
         start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
         end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
@@ -110,9 +136,10 @@ def main(username):
 
         if records:
             df = pd.DataFrame(records)
-            df = df.drop(columns=["_id", "username","certificate_pdf"])  # Drop columns that are not needed in the table
+            df = df.drop(columns=["_id", "username", "certificate_pdf"])  # Drop columns that are not needed in the table
             st.table(df)
         else:
             st.write("No data found for this year.")
+
 if __name__ == "__main__":
     main(st.session_state.username)

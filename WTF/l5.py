@@ -4,16 +4,16 @@ from pymongo import MongoClient
 import base64
 import pandas as pd
 from .l1 import pascal_case
+
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
 collection = db['l5']  # Replace 'l5' with your actual collection name
 collection_users = db['users']  # Replace 'users' with your actual collection name for users
+collection_custom = db['custom_inputs']  # Custom inputs collection
 
 def get_points(certificate_type, relevance):
-    """
-    Function to get the points based on the type of certificate and relevance to the field of specialization.
-    """
+    """Function to get the points based on the type of certificate and relevance to the field of specialization."""
     if certificate_type == "Certificate course/Online certificate/MOOCs course offered by Foreign Universities":
         return 100 if relevance == "Yes" else 50
     elif certificate_type == "Certificate course/Online certificate/MOOCs course offered by IIT/NIT":
@@ -21,6 +21,10 @@ def get_points(certificate_type, relevance):
     elif certificate_type == "Certificate course/Online certificate/MOOCs course offered by lower than IIT/NIT institutes or universities":
         return 50 if relevance == "Yes" else 25
     return 0
+
+def get_custom_inputs(page):
+    """Fetch custom inputs based on the specified page."""
+    return list(collection_custom.find({"page": page}))
 
 def main(username):
     if "visibility" not in st.session_state:
@@ -30,6 +34,7 @@ def main(username):
     with st.form("l5"):
         st.title("Certificate Courses Done")
 
+        # Existing fields for certificate input
         certificate_options = [
             "Certificate course/Online certificate/MOOCs course offered by Foreign Universities",
             "Certificate course/Online certificate/MOOCs course offered by IIT/NIT",
@@ -42,7 +47,7 @@ def main(username):
             label_visibility=st.session_state.visibility,
             disabled=st.session_state.disabled,
         )
-        relevance_options = ["Yes","No"]
+        relevance_options = ["Yes", "No"]
         relevance = st.selectbox(
             "Is the Subject Relevant to Your Field",
             options=relevance_options,
@@ -55,7 +60,17 @@ def main(username):
         # Calculate points based on selected options
         points = get_points(certificate_type, relevance)
 
-
+        # Fetch and display dynamically added inputs (e.g., media, dropdowns)
+        custom_inputs = get_custom_inputs("l5")
+        additional_data = {}
+        
+        for custom_input in custom_inputs:
+            if custom_input['input_type'] == "Text":
+                additional_data[custom_input['input_name']] = st.text_input(custom_input['input_name'])
+            elif custom_input['input_type'] == "Dropdown":
+                additional_data[custom_input['input_name']] = st.selectbox(custom_input['input_name'], custom_input['options'])
+            elif custom_input['input_type'] == "Media":
+                st.file_uploader(f"Upload {custom_input['input_name']} (Media)", type=["jpg", "jpeg", "png", "pdf"])
 
         if st.form_submit_button("Submit"):
             # Check for empty fields
@@ -86,12 +101,16 @@ def main(username):
                     "certificate_file": encoded_certificate
                 }
                 
+                # Add custom inputs to the data dictionary
+                data.update(additional_data)
+                
                 # Insert data into l5 collection
                 collection.insert_one(data)
                 st.success("Data inserted successfully!")
                 
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+        
         st.subheader("Certificates Done This Year")
         start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
         end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
@@ -100,10 +119,11 @@ def main(username):
 
         if records:
             df = pd.DataFrame(records)
-            df = df.drop(columns=["_id", "username","certificate_file"])  # Drop columns that are not needed in the table
+            df = df.drop(columns=["_id", "username", "certificate_file"])  # Drop columns that are not needed in the table
             st.table(df)
         else:
             st.write("No data found for this year.")
+
 if __name__ == "__main__":
-    # Ensure the username is set in session state before running the main function  # Replace 'your_username' with the actual username
+    # Ensure the username is set in session state before running the main function
     main(st.session_state.username)

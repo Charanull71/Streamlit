@@ -4,11 +4,13 @@ import datetime
 import base64
 import pandas as pd
 from .l1 import pascal_case
+
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
-collection = db['l12']  # Replace 'lll01' with your actual collection name
-collection_users = db['users']
+collection = db['l12']  # Replace 'l12' with your actual collection name
+collection_users = db['users']  # Replace 'users' with your actual collection name for users
+collection_custom = db['custom_inputs']  # Collection for dynamic inputs
 
 def calculate_points(journal_type, authorship_position):
     points_dict = {
@@ -19,10 +21,18 @@ def calculate_points(journal_type, authorship_position):
     }
     return points_dict.get(journal_type, {}).get(authorship_position, 0)
 
-def main(username):
-    with st.form("l12"):
-        st.title("No. Of JOURNAL PUBLICATIONS in present assessment year:")
+def get_custom_inputs(page):
+    return list(collection_custom.find({"page": page}))
 
+def main(username):
+    if "visibility" not in st.session_state:
+        st.session_state.visibility = "visible"
+        st.session_state.disabled = False
+
+    with st.form("l12"):
+        st.title("Journal Publications for Current Assessment Year")
+
+        # Journal Publication Details
         st.write("Journal Publication Details")
         ath = st.text_input("No of authors", value="", placeholder="Enter Number of Authors")
         pat = st.text_input("Position of authorship", value="", placeholder="Enter Position of Authorship")
@@ -43,6 +53,18 @@ def main(username):
         # File uploader for PDF at the end
         pdf_uploader2 = st.file_uploader("Upload your lecture work in PDF", type=["pdf"], key="pdf2")
 
+        # Fetch and display dynamically added inputs
+        custom_inputs = get_custom_inputs("l12")
+        additional_data = {}
+
+        for custom_input in custom_inputs:
+            if custom_input['input_type'] == "Text":
+                additional_data[custom_input['input_name']] = st.text_input(custom_input['input_name'])
+            elif custom_input['input_type'] == "Dropdown":
+                additional_data[custom_input['input_name']] = st.selectbox(custom_input['input_name'], custom_input['options'])
+            elif custom_input['input_type'] == "Media":
+                additional_data[custom_input['input_name']] = st.file_uploader(f"Upload {custom_input['input_name']} (Media)", type=["jpg", "jpeg", "png", "pdf"])
+
         if st.form_submit_button("Submit"):
             # Check for empty fields
             if not (ath and pat and pubd and Jtype and Subject11 and Subject13 and Subject21):
@@ -54,8 +76,6 @@ def main(username):
                 return
             
             try:
-                username = st.session_state.username  # Replace with your actual way of getting username
-
                 # Query users collection to get department for the specified username
                 user_data = collection_users.find_one({"username": username})
                 if user_data:
@@ -89,11 +109,16 @@ def main(username):
                     "points": points,
                     "date": datetime.datetime.now()
                 }
+                # Add custom inputs to the data dictionary
+                data.update(additional_data)
+
                 collection.insert_one(data)
                 st.success(f"Data inserted successfully! Total Points: {points}")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-    st.subheader("Journal Publications(Current Academic Year)")
+
+    # Display Journal Publications for Current Academic Year
+    st.subheader("Journal Publications (Current Academic Year)")
     start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
     end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
     query = {"username": username, "date": {"$gte": start_date, "$lte": end_date}}
@@ -105,5 +130,6 @@ def main(username):
         st.table(df)
     else:
         st.write("No data found for this year.")
+
 if __name__ == "__main__":
     main(st.session_state.username)

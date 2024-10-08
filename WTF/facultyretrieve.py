@@ -16,6 +16,7 @@ collection5 = db['l5']
 collection6 = db['l6']
 collection7 = db['l7']
 collection8 = db['l8']
+collection9 = db['l9']
 collection10 = db['l10']
 collection11 = db['l11']
 collection12 = db['l12']
@@ -293,6 +294,24 @@ def get_points_l7(fdp_type, funding_type, capacity):
     }
     
     return points_dict.get((fdp_type, funding_type, capacity), 0)
+points_dict8 = {
+    "Principal": 100,
+    "Vice Principal": 100,
+    "Dean": 90,
+    "Assoc. Dean": 90,
+    "HOD": 80,
+    "College level section Incharge": 80,
+    "BoS Incharge": 50,
+    "Library Incharge": 50,
+    "Project Co-Ordinator": 50,
+    "Committee Membership": 5  # Updated to 5 points for each membership
+}
+points_dict9 = {
+    "If student selected for MNC or GATE/GRE qualified or became entrepreneur or got Govt. Job": 5,
+    "If student selected for selected for a company other than MNC": 4,
+    "If student Promoted/Releived without any of the above": 3,
+    "If student Discontined/Detained": 0
+}
 def get_points_l10(membership_type):
     if membership_type == "International Membership":
         return 50
@@ -585,21 +604,36 @@ def update_data_collection7(row_id, new_data):
     except Exception as e:
         st.error(f"Error updating data: {e}")
         return False
-# def fetch_all_data_collection8(username):
-#     return list(collection8.find({"username": username}))
-# def fetch_row_data_collection8(row_id):
-#     return collection8.find_one({"_id": ObjectId(row_id)})
-# def update_data_collection8(row_id, new_data):
-#     try:
-#         update_result = collection8.find_one_and_update(
-#             {"_id": ObjectId(row_id)},
-#             {"$set": new_data},
-#             return_document=True
-#         )
-#         return update_result is not None
-#     except Exception as e:
-#         st.error(f"Error updating data: {e}")
-#         return False
+def fetch_all_data_collection8(username):
+    return list(collection8.find({"username": username}))
+def fetch_row_data_collection8(row_id):
+    return collection8.find_one({"_id": ObjectId(row_id)})
+def update_data_collection8(row_id, new_data):
+    try:
+        update_result = collection8.find_one_and_update(
+            {"_id": ObjectId(row_id)},
+            {"$set": new_data},
+            return_document=True
+        )
+        return update_result is not None
+    except Exception as e:
+        st.error(f"Error updating data: {e}")
+        return False
+def fetch_all_data_collection9(username):
+    return list(collection9.find({"username": username}))
+def fetch_row_data_collection9(row_id):
+    return collection9.find_one({"_id": ObjectId(row_id)})
+def update_data_collection9(row_id, new_data):
+    try:
+        update_result = collection8.find_one_and_update(
+            {"_id": ObjectId(row_id)},
+            {"$set": new_data},
+            return_document=True
+        )
+        return update_result is not None
+    except Exception as e:
+        st.error(f"Error updating data: {e}")
+        return False
 def fetch_all_data_collection10(username):
     return list(collection10.find({"username": username}))
 def fetch_row_data_collection10(row_id):
@@ -1280,6 +1314,188 @@ def display_form_collection7(row_data=None, row_id=None):
                 st.success("Data added successfully!")
         except Exception as e:
             st.error(f"An error occured: {e}")
+def display_form_collection8(row_data=None, row_id=None):
+    st.title("Professional Roles")
+
+    # College level roles options
+    college_roles = ["None", "Principal", "Vice Principal", "Dean", "Assoc. Dean"]
+    department_roles = ["None", "HOD", "College level section Incharge"]
+    
+    # Fetching user details
+    user_data = collection_users.find_one({"username": st.session_state.username})
+    if user_data:
+        department = user_data.get("department", "")
+    else:
+        st.error("Username not found in users collection.")
+        return
+
+    # Form inputs for College level roles
+    st.write("**College level (Principal, Vice Principal, Deans etc.)**")
+    college_role = st.selectbox("Select College Level Role", options=college_roles, index=college_roles.index(row_data["college_role"]) if row_data else 0)
+    
+    if college_role != "None":
+        college_role_nature_of_work = st.text_input("Nature of work", value=row_data["college_role_nature_of_work"] if row_data else "")
+        college_role_since = st.date_input("Since Date", value=datetime.datetime.strptime(row_data["college_role_since"], "%Y-%m-%d") if row_data else datetime.datetime.now())
+        college_role_till = st.date_input("Till Date", value=datetime.datetime.strptime(row_data["college_role_till"], "%Y-%m-%d") if row_data else datetime.datetime.now())
+        st.write(f"**Points for {college_role}:** {points_dict8[college_role]}")
+    else:
+        college_role_nature_of_work = college_role_since = college_role_till = None
+
+    # Form inputs for Department level roles
+    st.write("**Department level (HOD, Incharge)**")
+    department_role = st.selectbox("Select Department Level Role", options=department_roles, index=department_roles.index(row_data["department_role"]) if row_data else 0)
+    
+    if department_role != "None":
+        department_name = st.text_input("Department", value=row_data["department_name"] if row_data else department)
+        department_nature_of_work = st.text_input("Nature of work", value=row_data["department_nature_of_work"] if row_data else "")
+        department_since = st.date_input("Since Date", value=datetime.datetime.strptime(row_data["department_since"], "%Y-%m-%d") if row_data else datetime.datetime.now())
+        department_till = st.date_input("Till Date", value=datetime.datetime.strptime(row_data["department_till"], "%Y-%m-%d") if row_data else datetime.datetime.now())
+        st.write(f"**Points for {department_role}:** {points_dict8[department_role]}")
+    else:
+        department_name = department_nature_of_work = department_since = department_till = None
+
+    # Incharges and Committee Coordinators
+    st.write("**Incharges & Committee Coordinators**")
+    incharges_text = st.text_input("Enter roles (comma-separated)", value=", ".join(row_data["incharges"]) if row_data else "")
+    incharges_points = len(incharges_text.split(",")) * 5 if incharges_text else 0
+    st.write(f"**Total Points for Incharges:** {incharges_points}")
+
+    # Committee Memberships
+    st.write("**Committee Memberships**")
+    memberships_text = st.text_input("Enter memberships (comma-separated)", value=", ".join(row_data["memberships"]) if row_data else "")
+    memberships_points = len(memberships_text.split(",")) * 5 if memberships_text else 0
+    st.write(f"**Total Points for Memberships:** {memberships_points}")
+
+    # File uploader for certificate PDF
+    certificate_file = st.file_uploader("Upload role certificates (PDF)", type=["pdf"])
+
+    # On form submit
+    if st.button("Submit"):
+        if not (college_role != "None" or department_role != "None" or incharges_text or memberships_text):
+            st.error("Please fill out at least one role.")
+            return
+        
+        if not certificate_file:
+            st.error("Please upload the certificate PDF.")
+            return
+
+        try:
+            # Read and encode certificate
+            certificate_content = certificate_file.read()
+            encoded_certificate = base64.b64encode(certificate_content).decode('utf-8')
+
+            # Calculate total points
+            total_points = 0
+            if college_role != "None":
+                total_points += points_dict8[college_role]
+            if department_role != "None":
+                total_points += points_dict8[department_role]
+            total_points += incharges_points + memberships_points
+            total_points = min(total_points, 100)
+
+            # Data structure to insert/update
+            new_data = {
+                "college_role": college_role,
+                "college_role_nature_of_work": college_role_nature_of_work,
+                "college_role_since": college_role_since.strftime("%Y-%m-%d"),
+                "college_role_till": college_role_till.strftime("%Y-%m-%d"),
+                "department_role": department_role,
+                "department_name": department_name,
+                "department_nature_of_work": department_nature_of_work,
+                "department_since": department_since.strftime("%Y-%m-%d"),
+                "department_till": department_till.strftime("%Y-%m-%d"),
+                "incharges": [role.strip() for role in incharges_text.split(",")],
+                "memberships": [role.strip() for role in memberships_text.split(",")],
+                "certificate_file": encoded_certificate,
+                "total_points": total_points,
+                "department": department,
+                "date": datetime.datetime.now()
+            }
+
+            # Insert or update data
+            if row_id:
+                collection8.update_one({"_id": row_id}, {"$set": new_data})
+                st.success("Data updated successfully!")
+            else:
+                collection8.insert_one(new_data)
+                st.success("Data added successfully!")
+        
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+def get_btech_years():
+    return ["1", "2", "3", "4"]
+
+# Predefined departments
+def get_departments():
+    departments = ["CSE", "ECE", "EEE", "Mechanical", "Civil"]  # Add more departments as needed
+    return departments
+
+# Main function for displaying the form
+def display_form_collection9(username, row_data=None):
+    with st.form("l9"):
+        st.title("Students Counselling/Mentoring")
+
+        # Fetch user data from the 'users' collection
+        user_data = collection_users.find_one({"username": username})
+        if user_data:
+            department = user_data.get("department", "")
+        else:
+            st.error("Username not found in users collection.")
+            return
+
+        # Dropdown for B.Tech year (numeric)
+        year = st.selectbox("Select Year", get_btech_years(), index=get_btech_years().index(row_data["year"]) if row_data else 0)
+
+        # Dropdown for Department
+        department = st.selectbox("Select Department", get_departments(), index=get_departments().index(row_data["department"]) if row_data else 0)
+
+        # Combine Year and Department into a single field for storage
+        year_department = f"{year} - {department}"
+
+        student_regd_nos = st.text_input("Regd. no(s). of student", value=row_data["student_regd_nos"] if row_data else "", placeholder="18A51A0501-18A51A0521")
+        number_of_students = st.text_input("Number of students", value=row_data["number_of_students"] if row_data else "", placeholder="Enter number of students")
+        specific_remarks = st.text_input("Specific remarks", value=row_data["specific_remarks"] if row_data else "", placeholder="Enter specific remarks (e.g., 16 Selected in Campus Interviews)")
+
+        # Dropdown for student outcome
+        student_outcome = st.selectbox(
+            "Select student outcome",
+            list(points_dict9.keys()),
+            index=list(points_dict9.keys()).index(row_data["student_outcome"]) if row_data else 0
+        )
+
+        # Form submission
+        if st.form_submit_button("Submit"):
+            # Check for empty fields
+            if not student_regd_nos or not number_of_students or not specific_remarks or not student_outcome:
+                st.error("Please fill out all required fields.")
+                return
+
+            try:
+                # Calculate points based on student outcome and number of students
+                points = points_dict9[student_outcome] * int(number_of_students)
+
+                # Structure of the data to insert or update
+                data = {
+                    "username": username,
+                    "year_department": year_department,
+                    "student_regd_nos": student_regd_nos,
+                    "number_of_students": number_of_students,
+                    "specific_remarks": specific_remarks,
+                    "student_outcome": student_outcome,
+                    "points": points,
+                    "department": department,
+                    "date": datetime.datetime.now()
+                }
+
+                if row_data:
+                    collection9.update_one({"_id": row_data["_id"]}, {"$set": data})
+                    st.success("Data updated successfully!")
+                else:
+                    collection9.insert_one(data)
+                    st.success("Data inserted successfully!")
+
+            except Exception as e:
+                st.error(f"An error occurred: {e}")
 
 def display_form_collection10(row_data=None, row_id=None):
     st.header("MEMBERSHIPS WITH PROFESSIONAL BODIES")
@@ -2134,6 +2350,8 @@ def main(username):
             "Certificates Courses Done",
             "FDPs Attended",
             "FDPs Organized",
+            "Professional Roles",
+            "Student Counselling/Monitoring",
             "Memberships with Professional Bodies",
             "Chairing Sessions & Delivering Talks and Lectures",
             "Journal Publications",
@@ -2361,7 +2579,38 @@ def main(username):
                 st.write("No data found")
         if 'current_row_id' in st.session_state:
             display_form_collection7(row_data=st.session_state.current_data, row_id=st.session_state.current_row_id)
+    elif collection_choice == "FDPs Organized":
+        st.title("Professional Roles")
 
+    if username:
+        data = collection8.find({"username": username})
+        if data:
+            for entry in data:
+                # Display College Level Roles
+                st.markdown(f"**College Role:** {entry.get('college_role', 'N/A')}")
+                st.markdown(f"**Nature of Work (College):** {entry.get('college_role_nature_of_work', 'N/A')}")
+                st.markdown(f"**Since Date (College):** {entry.get('college_role_since', 'N/A')}")
+                st.markdown(f"**Till Date (College):** {entry.get('college_role_till', 'N/A')}")
+                st.markdown(f"**Points (College):** {points_dict8.get(entry.get('college_role', 'None'), 0)}")
+
+                # Display Department Level Roles
+                st.markdown(f"**Department Role:** {entry.get('department_role', 'N/A')}")
+                st.markdown(f"**Department Name:** {entry.get('department_name', 'N/A')}")
+                st.markdown(f"**Nature of Work (Department):** {entry.get('department_nature_of_work', 'N/A')}")
+                st.markdown(f"**Since Date (Department):** {entry.get('department_since', 'N/A')}")
+                st.markdown(f"**Till Date (Department):** {entry.get('department_till', 'N/A')}")
+                st.markdown(f"**Points (Department):** {points_dict8.get(entry.get('department_role', 'None'), 0)}")
+
+                # Modify Button
+                if st.button(f"Modify", key=f"modify_{entry['_id']}"):
+                    st.session_state.current_row_id = str(entry["_id"])
+                    st.session_state.current_data = entry
+                    st.rerun()
+                st.write("---")
+        else:
+            st.write("No data found.")
+        if 'current_row_id' in st.session_state:
+            display_form_collection8(row_data=st.session_state.current_data, row_id=st.session_state.current_row_id)
     elif collection_choice == "Memberships with Professional Bodies":
         st.header("Memberships with Professional Bodies")
 

@@ -68,20 +68,17 @@ def create_pdf_from_decoded_files(decoded_files):
     return output
 
 # Main function
-def main(username, role, department):
+def main(username, role):
     st.title("Retrieval and Notification Page")
 
     # Simulate the logged-in user's username and role
-    if "logged_in_username" not in st.session_state:
-        st.session_state.logged_in_username = username  # Replace this with actual login logic
-    if "logged_in_role" not in st.session_state:
-        st.session_state.logged_in_role = role
-    if "logged_in_department" not in st.session_state:
-        st.session_state.logged_in_department = department
+    hod_user = db['users'].find_one({"username": username, "role": "HOD"})
+    
+    if not hod_user:
+        st.error("HOD user not found")
+        return
 
-    username = st.session_state.logged_in_username
-    role = st.session_state.logged_in_role
-    department = st.session_state.logged_in_department
+    hod_department = hod_user.get("department")
     
     st.text_input("Logged-in Username:", username, disabled=True)
     st.text_input("Role:", role, disabled=True)
@@ -105,7 +102,7 @@ def main(username, role, department):
                 file_fields = collections_with_files[collection_name]
                 
                 if role == "HOD":
-                    data = retrieve_data_from_collection(department=department, collection_name=collection_name, start_date=start_date, end_date=end_date, file_fields=file_fields)
+                    data = retrieve_data_from_collection(department=hod_department, collection_name=collection_name, start_date=start_date, end_date=end_date, file_fields=file_fields)
                 else:
                     data = retrieve_data_from_collection(username=username, collection_name=collection_name, start_date=start_date, end_date=end_date, file_fields=file_fields)
                 
@@ -142,7 +139,7 @@ def main(username, role, department):
                 file_fields = collections_with_files[collection_name]
                 
                 if role == "HOD":
-                    data = retrieve_data_from_collection(department=department, collection_name=collection_name, file_fields=file_fields)
+                    data = retrieve_data_from_collection(department=hod_department, collection_name=collection_name, file_fields=file_fields)
                 else:
                     data = retrieve_data_from_collection(username=username, collection_name=collection_name, file_fields=file_fields)
                 

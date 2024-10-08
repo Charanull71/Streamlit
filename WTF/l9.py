@@ -2,6 +2,7 @@ import streamlit as st
 from pymongo import MongoClient
 import datetime
 import pandas as pd
+
 # MongoDB connection
 client = MongoClient("mongodb+srv://devicharanvoona1831:HSABL0BOyFNKdYxt@cluster0.fq89uja.mongodb.net/")
 db = client['Streamlit']  # Replace 'Streamlit' with your actual database name
@@ -11,35 +12,58 @@ collection_users = db['users']  # Users collection
 # Points dictionary for various student outcomes
 points_dict = {
     "If student selected for MNC or GATE/GRE qualified or became entrepreneur or got Govt. Job": 5,
-    "If student selected for selected for a company other than MNC": 4,
-    "If student Promoted/Releived without any of the above": 3,
-    "If student Discontined/Detained": 0
+    "If student selected for a company other than MNC": 4,
+    "If student Promoted/Relieved without any of the above": 3,
+    "If student Discontinued/Detained": 0
 }
+
+# Predefined B.Tech years as numbers
+def get_btech_years():
+    return ["1", "2", "3", "4"]
+
+# Predefined departments (or you can fetch dynamically from MongoDB if required)
+def get_departments():
+    departments = ["CSE", "CSM", "CSD", "ECE", "EEE", "IT", "MECH", "CIVIL"]  # Add more departments as needed
+    return departments
 
 def main(username):
     with st.form("l9"):
         st.title("Students Counselling/Mentoring")
 
-        year_department = st.text_input("Year & Department", value="", placeholder="Enter Year & Department")
+        # Dropdown for B.Tech year (numeric)
+        col1, col2 = st.columns(2)
+        with col1:
+            year = st.selectbox("Select Year", get_btech_years())
+
+        # Dropdown for Department
+        with col2:
+            department = st.selectbox("Select Department", get_departments())
+
+        # Combine Year and Department into a single field for storage
+        year_department = f"{year} - {department}"
+
+        # Input for student registration numbers and specific remarks
         student_regd_nos = st.text_input("Regd. no(s). of student", value="", placeholder="18A51A0501-18A51A0521")
-        number_of_students = st.text_input("Number of students", value="", placeholder="Enter number of students")
         specific_remarks = st.text_input("Specific remarks", value="", placeholder="Enter specific remarks (e.g., 16 Selected in Campus Interviews)")
 
-        # Dropdown for student outcome
-        student_outcome = st.selectbox(
-            "Select student outcome",
-            list(points_dict.keys())
-        )
+        # Input for the number of students in each outcome category
+        st.write("### Enter the number of students for each outcome:")
+        outcomes_data = {}
+        total_points = 0
+        for outcome, points_per_student in points_dict.items():
+            num_students = st.number_input(f"Number of students for: {outcome}", min_value=0, step=1, key=outcome)
+            outcomes_data[outcome] = num_students
+            total_points += num_students * points_per_student
 
         if st.form_submit_button("Submit"):
             # Check for empty fields
-            if not year_department or not student_regd_nos or not number_of_students or not specific_remarks or not student_outcome:
+            if not student_regd_nos or not specific_remarks:
                 st.error("Please fill out all required fields.")
                 return
 
             try:
                 username = st.session_state.username  # Replace with your actual way of getting username
-                
+
                 # Query users collection to get department for the specified username
                 user_data = collection_users.find_one({"username": username})
                 if user_data:
@@ -48,26 +72,26 @@ def main(username):
                     st.error("Username not found in users collection.")
                     return
 
-                # Calculate points based on student outcome and number of students
-                points = points_dict[student_outcome] * int(number_of_students)
-
+                # Prepare the data to be inserted into MongoDB
                 data = {
                     "username": username,
                     "year_department": year_department,
                     "student_regd_nos": student_regd_nos,
-                    "number_of_students": number_of_students,
                     "specific_remarks": specific_remarks,
-                    "student_outcome": student_outcome,
-                    "points": points,
+                    "outcomes_data": outcomes_data,
+                    "total_points": total_points,
                     "department": department,
                     "date": datetime.datetime.now()
                 }
 
+                # Insert the data into MongoDB
                 collection.insert_one(data)
-                st.success("Data inserted successfully!")
+                st.success(f"Data inserted successfully with a total of {total_points} points!")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
-        st.subheader("Students Counselling(Current Academic Year)")
+
+        # Display records from MongoDB for the current academic year
+        st.subheader("Students Counselling (Current Academic Year)")
         start_date = datetime.datetime(datetime.datetime.now().year, 1, 1)
         end_date = datetime.datetime(datetime.datetime.now().year, 12, 31)
         query = {"username": username, "date": {"$gte": start_date, "$lte": end_date}}
@@ -75,10 +99,12 @@ def main(username):
 
         if records:
             df = pd.DataFrame(records)
-            df = df.drop(columns=["_id", "username"])  # Drop columns that are not needed in the table
+
+            # Exclude 'outcomes_data' column from the table
+            df = df.drop(columns=["_id", "username", "outcomes_data"])  # Drop unwanted columns
             st.table(df)
         else:
             st.write("No data found for this year.")
+
 if __name__ == "__main__":
-    # Replace 'your_username' with the actual username
     main(st.session_state.username)

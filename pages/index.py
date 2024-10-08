@@ -173,14 +173,14 @@ def admin_home():
     st.title(f"Welcome Admin: {st.session_state.username}")
     if st.sidebar.button("Logout"):
         logout()
-    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User","Issues","Admin user"])
+    nav = st.sidebar.radio("Navigation", ["Add User", "Suspend User","Issues","Add Fields","Delete Fields"])
     if nav == "Add User":
         add_user_form()
     elif nav == "Suspend User":
         suspend_user_form()
     elif nav == "Issues":
         adminissue.main()
-    elif nav == "Admin user":
+    elif nav == "Add Fields":
         adman.main()
 def add_user_form():
     st.header("Add New User")
@@ -273,13 +273,13 @@ def hod_home():
     elif nav == "Sent":
         sent.main()
     elif nav == "Pdf View":
-        pdf.main()
+        pdf.main(st.session_state.username,st.session_state.role)
     elif nav == "Retrieved Data":
         retrieve.main()
     elif nav == "Departmental Retrieve":
         HODD.main(st.session_state.username)
     elif nav == "Departmental POW Retrieve":
-        HODDPOW.main(st.session_state.username, st.session_state.role, st.session_state.department)
+        HODDPOW.main(st.session_state.username, st.session_state.role)
     elif nav == "Graph":
         pc.main(st.session_state.username)
 
@@ -345,7 +345,7 @@ def faculty_home():
     elif nav == "Notifications":
         notification.main(st.session_state.username)
     elif nav == "PDF View":
-        pdf.main()
+        pdf.main(st.session_state.username,st.session_state.role)
     elif nav == "Issues":
         issues.main(st.session_state.username)
     elif nav == "Graphical Analysis":
@@ -363,14 +363,14 @@ def principal_home():
     if st.sidebar.button("Logout"):
         logout()
 
-    nav = st.sidebar.radio("Navigation", ["Faculty Details", "Received", "Pdf View", "Graph", "Sent"])
+    nav = st.sidebar.radio("Navigation", ["Faculty Details", "Received", "Pdf View", "Graph"])
 
     if nav == "Faculty Details":
         show_faculty_details()
     elif nav == "Received":
         r.main()
     elif nav == "Pdf View":
-        pdf.main()
+        pdf.main(st.session_state.username,st.session_state.role)
     elif nav == "Sent":
         st.write("No sent page")
     elif nav == "Graph":
