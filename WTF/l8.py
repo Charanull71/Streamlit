@@ -134,7 +134,7 @@ def main(username):
                     "memberships": membership_roles if memberships_text else [],
                     "department": department,
                     "certificate_file": encoded_certificate,
-                    "total_points": total_points,
+                    "points": total_points,
                     "date": datetime.datetime.now()
                 }
 

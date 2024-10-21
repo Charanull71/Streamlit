@@ -79,7 +79,7 @@ def main(username):
                     "student_regd_nos": student_regd_nos,
                     "specific_remarks": specific_remarks,
                     "outcomes_data": outcomes_data,
-                    "total_points": total_points,
+                    "points": total_points,
                     "department": department,
                     "date": datetime.datetime.now()
                 }

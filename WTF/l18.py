@@ -86,7 +86,7 @@ def main(username):
                     "granting_agency": pascal_case(nga),
                     "coordinators_involved": nci,
                     "position_coordinatorship": poc,
-                    "position_points": poc_points,
+                    "points": poc_points,
                     "since_date": sin,
                     "grant_amount_mobilised": gm,
                     "department": department,
